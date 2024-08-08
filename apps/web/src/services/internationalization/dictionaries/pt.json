@@ -1,0 +1,750 @@
+{
+  "id": "pt",
+  "auth": {
+    "main": {
+      "button": {
+        "label": "Contatar Suporte"
+      }
+    },
+    "footer": {
+      "rights": "Todos os direitos reservados"
+    },
+    "metadata": {
+      "title": "Entrar em",
+      "description": ["Bem-vindo ao", "Por favor, faça login."]
+    }
+  },
+  "onboarding": {
+    "getStarted": {
+      "main": {
+        "steps": {
+          "first": {
+            "title": "Informações Básicas",
+            "subtitle": "Antes de começar, precisamos de algumas informações sobre você",
+            "form": {
+              "fields": {
+                "name": {
+                  "label": "Seu nome",
+                  "placeholder": "Digite seu nome aqui"
+                },
+                "email": {
+                  "label": "Seu email",
+                  "placeholder": "Digite seu email aqui"
+                },
+                "phone": {
+                  "label": "Número de telefone",
+                  "placeholder": "Digite seu número de telefone aqui"
+                },
+                "submit": {
+                  "label": "Continuar"
+                }
+              }
+            }
+          },
+          "second": {
+            "title": "Crie sua equipe",
+            "subtitle": "Crie sua equipe para começar",
+            "form": {
+              "fields": {
+                "name": {
+                  "label": "Nome",
+                  "placeholder": "Ex: Acme Inc"
+                },
+                "submit": {
+                  "label": "Continuar"
+                }
+              }
+            }
+          }
+        }
+       
+      },
+      "metadata": {
+        "title": "Começar"
+      }
+    }
+  },
+  "dashboard": {
+    "auth": {
+      "title": "Digite seu email abaixo para continuar"
+    },
+    "sidebar": {
+      "avatar": {
+        "card": {
+          "detail": "Clique para gerenciar"
+        }
+      },
+      "sections": {
+        "main": {
+          "items": {
+            "upgrade": "Upgrade",
+            "feedback": "Feedback"
+          }
+        },
+        "dashboard": {
+          "title": "Painel",
+          "items": {
+            "onboarding": "Onboarding",
+            "home": "Início",
+            "plugins": "Plugins",
+            "settings": "Configurações"
+          }
+        },
+        "help": {
+          "title": "Ajuda",
+          "items": {
+            "helpCenter": "Central de Ajuda",
+            "changelog": "Changelog",
+            "blog": "Blog"
+          }
+        },
+        "upgradeCard": {
+          "items": {
+            "seats": "Membros no Time",
+            "manageSubscription": "Gerenciar assinatura"
+          }
+        },
+        "userNav": {
+          "items": {
+            "profile": "Perfil",
+            "billing": "Assinatura",
+            "createTeam": "Criar equipe",
+            "homePage": "Página inicial",
+            "logOut": "Sair"
+          }
+        }
+      }
+    },
+    "feedback": {
+      "form": {
+        "title": "Enviar feedback",
+        "description": "Compartilhe seu feedback, solicitações de recursos, ideias ou relatórios de bugs.",
+        "toast": {
+          "title": "Feedback Enviado",
+          "description": "Seu feedback foi enviado com sucesso. Obrigado pela sua contribuição!"
+        },
+        "fields": {
+          "textarea": {
+            "placeholder": "Gostaria de sugerir..."
+          },
+          "submit": {
+            "label": "Enviar feedback"
+          }
+        }
+      }
+    },
+    "onboarding": {
+      "title": "Primeiros passos",
+      "sections": {
+        "header": {
+          "incomplete": {
+            "title": "Aguardando integração",
+            "subtitle": ["Aqui você encontrará um guia para maximizar o uso de", "Siga os passos abaixo para começar."]
+          },
+          "complete": {
+            "title": "Integração Completa",
+            "subtitle": "Parabéns! Você completou todos os passos de integração. Agora você está pronto para explorar todos os recursos de"
+          }
+        },
+        "main": {
+          "title": "Integração",
+          "steps": {
+            "first": {
+              "title": "Adicione sua foto de perfil",
+              "description": "Adicione uma foto de perfil para personalizar sua conta"
+            },
+            "second": {
+              "title": "Convide sua equipe",
+              "description": "Convide sua equipe para ajudar a gerenciar seus projetos"
+            },
+            "third": {
+              "title": "Atualizar plano",
+              "description": "Atualize seu plano para desbloquear mais recursos"
+            }
+          }
+        },
+        "footer": {
+          "message": "Ainda tem perguntas?",
+          "external": "Acesse nossa base de conhecimento"
+        }
+      }
+    },
+    "home": {
+      "title": "Início",
+      "main": {
+        "title": "Seu Micro-SaaS começa aqui 👋"
+      }
+    },
+    "plugins": {
+      "title": "Integrações",
+      "status": {
+        "install": "Instalar",
+        "installed": "Instalado"
+      },
+      "notifications": {
+        "name": "Notificações",
+        "description": "Conecte mensageiros para receber eventos da equipe, como novas vendas, novos leads, etc.",
+        "dialog": {
+          "title": ["Instalar aplicativo", "Desinstalar aplicativo"],
+          "help": {
+            "title": "Procurando assistência",
+            "description": "Veja nosso manual",
+            "external": "Saiba mais sobre integração"
+          }
+        },
+        "form": {
+          "clickToCopyButton": {
+            "label": "Copiar",
+            "toast": {
+              "title": "Copiado para a Área de Transferência",
+              "description": "foi copiado com sucesso."
+            }
+          },
+          "submit": {
+            "label": ["Atualizar", "Instalar"],
+            "toasts": {
+              "failed": {
+                "title": "Erro ao salvar a integração"
+              },
+              "success": {
+                "title": "Integração salva com sucesso!"
+              }
+            }
+          }
+        },
+        "integrations": {
+          "discord": {
+            "description": "Integre com o Discord para enviar notificações de eventos",
+            "field": {
+              "help": "Digite a URL do Webhook fornecida pelo Discord para habilitar notificações."
+            }
+          },
+          "slack": {
+            "description": "Integre com o Slack para enviar notificações de eventos",
+            "field": {
+              "help": "A URL do webhook fornecida pelo Slack quando você configura uma integração de webhook de entrada."
+            }
+          },
+          "webhook": {
+            "description": "Envie notificações de eventos para qualquer serviço",
+            "field": {
+              "help": "Digite a URL do Webhook onde você deseja receber notificações de eventos."
+            }
+          }
+        }
+      },
+      "metadata": {
+        "title": "Integrações"
+      }
+    },
+    "settings": {
+      "sidebar": {
+        "name": "Configurações",
+        "profile": "Perfil",
+        "theme": "Tema",
+        "team": "Equipe",
+        "members": "Membros",
+        "billing": "Assinatura",
+        "integrations": "Chave de API"
+      },
+      "main": {
+        "title": "Perfil",
+        "description": "Atualize suas informações de perfil aqui.",
+        "form": {
+          "toasts": {
+            "success": {
+              "title": "Sucesso",
+              "description": "Perfil atualizado com sucesso"
+            }
+          },
+          "fields": {
+            "avatar": {
+              "placeholder": "Carregar foto"
+            },
+            "name": {
+              "label": "Nome",
+              "placeholder": "Digite seu nome"
+            },
+            "username": {
+              "label": "Nome de usuário",
+              "placeholder": "Digite seu nome de usuário",
+              "helpText": "Este será seu identificador único em nossa plataforma."
+            },
+            "email": {
+              "label": "Email",
+              "placeholder": "Digite seu email",
+              "helpText": "Certifique-se de usar um endereço de email válido."
+            },
+            "locale": {
+              "label": "Idioma",
+              "placeholder": "Selecione seu idioma preferido"
+            }
+          },
+          "submit": {
+            "label": "Salvar alterações"
+          }
+        }
+      },
+      "theme": {
+        "title": "Tema",
+        "description": "Defina as configurações de aparência do seu aplicativo aqui.",
+        "form": {
+          "dark": "Escuro",
+          "light": "Claro"
+        },
+        "metadata": {
+          "title": "Tema"
+        }
+      },
+      "team": {
+        "title": "Equipe",
+        "description": "Ajuste as informações da sua equipe",
+        "form": {
+          "toasts": {
+            "success": {
+              "title": "Sucesso",
+              "description": "Equipe atualizada com sucesso"
+            }
+          },
+          "fields": {
+            "avatar": {
+              "placeholder": "Carregar foto"
+            },
+            "name": {
+              "label": "Nome",
+              "placeholder": "John Doe"
+            }
+          },
+          "submit": {
+            "label": "Salvar alterações"
+          }
+        },
+        "metadata": {
+          "title": "Equipe"
+        }
+      },
+      "members": {
+        "title": "Membros",
+        "description": "Gerencie os membros da sua equipe",
+        "form": {
+          "title": "Convidar membro",
+          "description": "Convide um membro para seu site.",
+          "toasts": {
+            "success": {
+              "title": "Membro convidado com sucesso",
+              "description": "O convite foi enviado para"
+            },
+            "failed": {
+              "title": "Erro ao convidar membro!",
+              "description": "Ocorreu um erro ao convidar o membro."
+            }
+          },
+          "fields": {
+            "email": {
+              "label": "Email",
+              "placeholder": "john@doe.com",
+              "description": "Enviaremos o convite por email."
+            },
+            "submit": {
+              "label": "Adicionar"
+            }
+          }
+        },
+        "main": {
+          "tabs": {
+            "members": {
+              "label": "Membros",
+              "card": {
+                "deleteMember": {
+                  "alertConfirmation": "Você tem certeza de que deseja deletar este membro?",
+                  "toasts": {
+                    "success": {
+                      "title": "Membro deletado com sucesso!"
+                    },
+                    "failed": {
+                      "title": "Ocorreu um erro ao deletar o membro."
+                    }
+                  },
+                  "button": {
+                    "title": "Deletar"
+                  }
+                }
+              }
+            },
+            "invites": {
+              "label": "Convites",
+              "card": {
+                "description": ["Aceito", "Enviado e aguardando aceitação"],
+                "deleteInvite": {
+                  "alertConfirmation": "Você tem certeza de que deseja deletar este convite?",
+                  "toasts": {
+                    "success": {
+                      "title": "Convite deletado com sucesso!"
+                    },
+                    "failed": {
+                      "title": "Ocorreu um erro ao deletar o convite."
+                    }
+                  },
+                  "button": {
+                    "delete": {
+                      "title": "Deletar convite"
+                    }
+                  }
+                },
+                "copyInvite": {
+                  "toasts": {
+                    "success": {
+                      "title": "Convite copiado com sucesso!",
+                      "description": "Agora é só enviar para seu amigo."
+                    }
+                  },
+                  "button": {
+                    "copy": {
+                      "title": "Copiar convite"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "submit": {
+            "label": "Convidar membro"
+          },
+          "emptyStates": {
+            "members": {
+              "title": "Nenhum Membro Encontrado",
+              "description": "Atualmente não há membros em sua equipe. Convide membros para começar."
+            },
+            "invites": {
+              "title": "Nenhum Convite Encontrado",
+              "description": "Atualmente não há convites em sua equipe. Convide membros para começar."
+            }
+          }
+        },
+        "metadata": {
+          "title": "Membros"
+        }
+      },
+      "billing": {
+        "title": "Assinatura",
+        "description": "Verifique seu uso mensal",
+        "form": {
+          "fields": {
+              "currentPlan": {
+                "label": "Plano atual",
+                "paymentInterval": {
+                  "month": "mês",
+                  "annual": "anual"
+                },
+                "upTo": "Até"
+              },
+              "newPlan": {
+                "paymentInterval": {
+                  "month": "mês",
+                  "annual": "anual"
+                },
+                "upTo": "Até"
+              },
+              "external": {
+                "label": "Gerenciar meu plano"
+              },
+            "changePlan": {
+              "label": "Mudar plano",
+              "description": {
+                "annual": "Cobrança anual",
+                "monthly": "Cobrança mensal"
+              }
+            }
+          }
+        }
+      },
+      "integrations": {
+        "title": "Chave de API",
+        "description": "Gerencie suas preferências de integração de conta",
+        "form": {
+          "messages": {
+            "confirmRegenerateToken": "Você tem certeza que deseja atualizar o token?"
+          },
+          "fields": {
+            "apiKey": {
+              "label": "Chave de API"
+            },
+            "documentation": {
+              "label": "Documentação",
+              "description": ["Explore nossa documentação para guias concisos e recursos sobre o uso de", "É um ótimo ponto de partida para usuários novos e experientes para melhorar sua experiência com os recursos de nossa plataforma."],
+              "external": "Documentação"
+            },
+            "alert": {
+              "description": "Ainda não tem um token"
+            }
+          }
+        },
+        "metadata": {
+          "title": "Chave de API"
+        }
+      }
+    },
+    "metadata": {
+      "title": "Início"
+    }
+  },
+  "site": {
+    "title": "Transforme Seu Projeto em um Micro-SaaS de Sucesso",
+    "description": "Acelere o crescimento do seu negócio com nossa plataforma – a solução perfeita para lançar seu Micro-SaaS sem esforço.",
+    "layout": {
+      "header": {
+        "nav": {
+          "start": "Início",
+          "features": "Recursos",
+          "pricing": "Preços",
+          "blog": "Blog",
+          "changelog": "Changelog",
+          "button": {
+            "label": "Entrar"
+          },
+          "ctaButton": {
+            "label": "Começar"
+          }
+        }
+      },
+      "footer": {
+        "rights": "Todos os direitos reservados",
+        "terms": "Termos de Serviço",
+        "privacy": "Política de Privacidade"
+      }
+    },
+      "sections": {
+        "hero": {
+          "title": "Transforme Seu Projeto em um Micro-SaaS de Sucesso",
+          "subtitle": "Acelere o crescimento do seu negócio com nossa plataforma – a solução perfeita para lançar seu Micro-SaaS sem esforço.",
+          "description": "Não é necessário cartão de crédito"
+        },
+        "features": {
+        "header": {
+          "badge": "Recursos Principais",
+          "title": "Potencialize Seu Micro-SaaS com Ferramentas Essenciais",
+          "description": "Eleve sua plataforma Micro-SaaS com um conjunto robusto incluindo Next 14, Next Auth, Prisma, Zod, React Hook Form e funcionalidades essenciais como Plugins, Assinaturas Stripe, Autenticação, Blog, Changelog, Painel e Sistema de Equipe."
+        },
+        "main": {
+          "features": {
+            "first": {
+              "title": "Autenticação Sem Complicações",
+              "description": "Segurança e simplificação do acesso do usuário com Next Auth. Implemente processos de autenticação sem problemas para melhorar a experiência e segurança do usuário."
+          },
+            "second": {
+              "title": "Gerenciamento de Assinaturas Sem Esforço",
+              "description": "Integre Assinaturas Stripe de forma transparente. Gerencie faturamento, assinaturas e pagamentos com facilidade, proporcionando uma experiência suave para você e seus usuários."
+          },
+            "third": {
+              "title": "Painel Abrangente",
+              "description": "Obtenha insights e gerencie sua plataforma com um painel intuitivo. Colabore efetivamente com um sistema de equipe integrado, melhorando a produtividade e o fluxo de trabalho."
+          }
+        }
+        }
+      },
+      "morePossibilities": {
+        "header": {
+          "badge": "Explore Mais Recursos",
+          "title": "Descubra o potencial completo do Boilerplate"
+        },
+        "main": {
+          "features": [
+            {
+              "title": "Autenticação Simplificada",
+              "description": "Aproveite o Next Auth para processos de autenticação de usuários seguros e sem complicações, melhorando tanto a experiência do usuário quanto a segurança da plataforma."
+            },
+            {
+              "title": "Integração com Assinaturas Stripe",
+              "description": "Gerencie faturamento, assinaturas e pagamentos facilmente através do Stripe, oferecendo uma experiência financeira contínua para seus usuários."
+            },
+            {
+              "title": "Extensível com Plugins",
+              "description": "Expanda as capacidades da sua plataforma com plugins, permitindo recursos personalizáveis adaptados às necessidades dos seus usuários."
+            },
+            {
+              "title": "Criação de Conteúdo Dinâmico",
+              "description": "Utilize nosso recurso de blog para envolver seu público com conteúdo fresco, mantendo-os informados e conectados à sua plataforma."
+            },
+            {
+              "title": "Análises em Tempo Real no Painel",
+              "description": "Monitore o desempenho da sua plataforma com um painel abrangente, fornecendo análises em tempo real para tomada de decisões informadas."
+            },
+            {
+              "title": "Sistema de Equipe Colaborativo",
+              "description": "Melhore a produtividade e a colaboração com um sistema de equipe integrado, otimizando fluxos de trabalho e gerenciamento de projetos."
+            }
+          ]
+        }
+      },
+      "pricing": {
+        "header": {
+          "badge": "Preços",
+          "title": ["Maximize a Geração de Leads", "com Preços Transparentes."],
+          "description": "Desbloqueie o potencial completo de cada link com os planos de preços da Use Link projetados para empresas de todos os tamanhos. Selecione o pacote que melhor se adapta aos seus objetivos de geração de leads."
+        },
+        "main": {
+          "submit": {
+            "label": "Começar"
+          }
+        },
+        "metadata": {
+          "title": "Preços",
+          "description": "Informações sobre nossos planos de preços e opções"
+        }
+      },
+      "efficiency": {
+        "header": {
+          "title": "Suíte com Conjunto de Ferramentas Incríveis para seu SaaS"
+        },
+        "main": {
+          "description": "Desbloqueie economia de custos, crescimento de receita e eficiência operacional com nosso Boilerplate SaaS integrado e abrangente. Aproveite o poder dos processos SaaS, gerencie operações de software e otimize seu negócio",
+          "details": ["aumento de velocidade", "tempo de dev", "tempo de envio"]
+        }
+      },
+      "firstFeatured": {
+        "header": {
+          "title": "Próximo nível com NextJS",
+          "description": "Integração com NextJS 14 App Folder e Server Actions"
+        },
+        "main": {
+          "description": "Descubra eficiência e facilidade de integração com os novos recursos do NextJS 14, incluindo o App Folder e Server Actions."
+        },
+        "button": {
+          "label": "Começar"
+        }
+      },
+      "secondFeatured": {
+        "header": {
+          "title": "Type Safety",
+          "description": "Integração com TypeScript no Boilerplate SaaS para Type Safety"
+        },
+        "main": {
+          "description": "Descubra eficiência e facilidade de integração com recursos do TypeScript, garantindo segurança de tipo em seu Boilerplate SaaS."
+        },
+        "button": {
+          "label": "Começar"
+        }
+      },
+      "posts": {
+        "postSocialBar": {
+          "buttons": {
+            "next": {
+              "label": "Próximo"
+            },
+            "previous": {
+              "label": "Anterior"
+            }
+          }
+        },
+        "postWrapper": {
+          "aside": {
+            "writtenBy": "Escrito Por",
+            "readMore": "Leia Mais"
+          }
+        }
+      },
+      "faq": {
+        "header": {
+          "title": "Perguntas Frequentes",
+          "description": "Encontre respostas para as perguntas mais comuns sobre o Boilerplate"
+        },
+        "main": {
+          "questions": [
+            {
+              "title": "O que é este Boilerplate Micro-SaaS?",
+              "content": "Este Boilerplate Micro-SaaS é um ponto de partida abrangente para construir suas próprias aplicações Micro-SaaS. Ele aproveita as tecnologias mais recentes, incluindo Next 14, Next Auth, Prisma, Zod e React Hook Form, para fornecer uma base robusta para seu projeto."
+            },
+            {
+              "title": "Quais recursos este Boilerplate inclui?",
+              "content": "O Boilerplate vem repleto de recursos essenciais para qualquer aplicação SaaS, incluindo suporte a plugins, Assinaturas Stripe para lidar com pagamentos, autenticação de usuários, uma plataforma de blogs, um recurso de changelog, um painel abrangente e um sistema de equipe para colaboração."
+            },
+            {
+              "title": "Posso personalizar o Boilerplate?",
+              "content": "Com certeza, o Boilerplate foi projetado para ser totalmente personalizável. Você pode adaptar o design, funcionalidade e recursos para atender às necessidades específicas do seu projeto, garantindo que sua aplicação se destaque."
+            },
+            {
+              "title": "Como funciona a autenticação?",
+              "content": "A autenticação é feita através do Next Auth, proporcionando uma autenticação de usuário segura e sem complicações. Isso permite o fácil gerenciamento de sessões de usuário e suporta vários provedores de autenticação."
+            },
+            {
+              "title": "Como posso gerenciar assinaturas e pagamentos?",
+              "content": "As Assinaturas Stripe estão integradas ao Boilerplate, permitindo que você gerencie faturamento, assinaturas e pagamentos facilmente. Isso proporciona uma experiência de transação financeira suave tanto para você quanto para seus usuários."
+            },
+            {
+              "title": "Há suporte para colaboração em equipe?",
+              "content": "Sim, o Boilerplate inclui um recurso de sistema de equipe que aprimora a produtividade e a colaboração. Ele permite que os membros da equipe trabalhem juntos de forma eficiente, otimizando fluxos de trabalho e gerenciamento de projetos."
+            },
+            {
+              "title": "Como posso acompanhar o desempenho da minha aplicação?",
+              "content": "O Boilerplate apresenta um painel abrangente que oferece análises em tempo real, permitindo que você monitore o desempenho de sua aplicação, o engajamento do usuário e outras métricas-chave para subsidiar a tomada de decisões e a otimização da estratégia."
+            },
+            {
+              "title": "Como começar com este Boilerplate Micro-SaaS?",
+              "content": "Começar é simples. Basta clonar o repositório do Boilerplate, configurá-lo de acordo com os requisitos do seu projeto e você estará pronto para começar a construir sua aplicação Micro-SaaS. Nossa documentação e equipe de suporte estão aqui para ajudá-lo durante todo o processo."
+            }
+          ]
+        }
+      },
+      "cta": {
+        "title": "Eleve seu Micro-SaaS com o Boilerplate SaaS",
+        "description": "Desbloqueie todo o potencial do seu Micro-SaaS com nossa pilha de tecnologia de ponta, incluindo Next 14, Next Auth, Prisma, Zod e React Hook Form.",
+        "ctaButton": {
+          "label": "Começar"
+        }
+      },
+      "changelog": {
+        "title": "Todas as atualizaçes mais recentes, melhorias e correções",
+        "metadata": {
+          "title": "Changelog",
+          "description": "Todas as atualizações, melhorias e correções em"
+        }
+      },
+        "blog": {
+        "title": "Últimas notícias e atualizações de",
+        "subscribeToUpdates": "Inscreva-se para ter acesso a atualizações",
+        "metadata": {
+          "title": "Blog",
+          "description": "Últimas notícias e atualizaçes de"
+        }
+      }
+    },
+    "breadcrumb": {
+      "backButton": {
+        "label": "Voltar"
+      }
+    }
+  },
+  "shared": {
+    "toasts": {
+      "acceptInvite": {
+        "failed": {
+          "title": "Convite aceito com sucesso!",
+          "description": "Ocorreu um erro ao aceitar o convite."
+        }
+      },
+      "declineInvite": {
+        "failed": {
+          "title": "Convite recusado com sucesso!",
+          "description": "Ocorreu um erro ao recusar o convite."
+        }
+      }
+    },
+    "main": {
+      "title": "convidou você para gerenciar uma equipe.",
+      "buttons": {
+        "accept": {
+          "label": "Aceitar"
+        },
+        "decline": {
+          "label": "Recusar"
+        }
+      }
+    },
+    "footer": {
+      "rights": "Todos os direitos reservados."
+    },
+    "metadata": {
+      "title": "Aceitar convite"
+    }
+  }
+}

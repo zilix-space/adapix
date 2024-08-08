@@ -1,0 +1,187 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "AdaPix Admin API",
+    "version": "1.0.0",
+    "description": "API for managing AdaPix Admin"
+  },
+  "servers": [
+    {
+      "url": "https://adapix.com.br/api/v1"
+    }
+  ],
+  "paths": {
+    "/kyc": {
+      "put": {
+        "operationId": "updateKycStatus",
+        "summary": "Update KYC status",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["approved", "rejected"]
+                  }
+                },
+                "required": ["userId", "status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "KYC status updated"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "get": {
+        "operationId": "getPendingKycUsers",
+        "summary": "Get users with pending KYC",
+        "responses": {
+          "200": {
+            "description": "List of users with pending KYC",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          },
+                          "kyc": {
+                            "type": "object",
+                            "properties": {
+                              "status": {
+                                "type": "string"
+                              },
+                              "statusReason": {
+                                "type": "string"
+                              },
+                              "data": {
+                                "type": "object"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/report": {
+      "get": {
+        "operationId": "getReportData",
+        "summary": "Get report data",
+        "description": "Retrieve various statistics and metrics for users and transactions.",
+        "responses": {
+          "200": {
+            "description": "Report data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "users": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "approved": {
+                          "type": "integer"
+                        },
+                        "pending": {
+                          "type": "integer"
+                        },
+                        "rejected": {
+                          "type": "integer"
+                        },
+                        "timeframe": {
+                          "type": "object",
+                          "properties": {
+                            "today": {
+                              "type": "integer"
+                            },
+                            "thisWeek": {
+                              "type": "integer"
+                            },
+                            "thisMonth": {
+                              "type": "integer"
+                            },
+                            "thisYear": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "transactions": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "totalSaledAda": {
+                          "type": "number"
+                        },
+                        "totalBoughtAda": {
+                          "type": "number"
+                        },
+                        "timeframe": {
+                          "type": "object",
+                          "properties": {
+                            "today": {
+                              "type": "integer"
+                            },
+                            "thisWeek": {
+                              "type": "integer"
+                            },
+                            "thisMonth": {
+                              "type": "integer"
+                            },
+                            "thisYear": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

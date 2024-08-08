@@ -1,0 +1,396 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Adapix API",
+    "version": "1.0.0",
+    "description": "API para estimar e gerenciar transações na plataforma Adapix."
+  },
+  "servers": [
+    {
+      "url": "https://adapix.com.br/api/v1"
+    }
+  ],
+  "paths": {
+    "/estimate": {
+      "get": {
+        "summary": "Obter cotação da Cardano",
+        "operationId": "getCardanoQuote",
+        "description": "Obtém a cotação atual da Cardano em relação ao Real (BRL).",
+        "responses": {
+          "200": {
+            "description": "Cotação obtida com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CardanoQuoteResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Estimar transação",
+        "operationId": "estimateTransaction",
+        "description": "Estima o resultado de uma transação de compra ou venda com base no valor fornecido.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EstimateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estimativa bem-sucedida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EstimateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transactions": {
+      "get": {
+        "summary": "Obter transações do usuário",
+        "operationId": "getUserTransactions",
+        "description": "Recupera uma lista de transações para o usuário autenticado.",
+        "security": [
+          {
+            "userAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recuperação bem-sucedida das transações",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Criar uma nova transação",
+        "operationId": "createTransaction",
+        "description": "Cria uma nova transação de compra ou venda para o usuário autenticado.",
+        "security": [
+          {
+            "userAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransactionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Criação bem-sucedida da transação",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me": {
+      "get": {
+        "summary": "Obter informações do usuário",
+        "operationId": "getUserInfo",
+        "description": "Recupera as informações do usuário autenticado.",
+        "security": [
+          {
+            "userAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recuperação bem-sucedida das informações do usuário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualizar informações do usuário",
+        "operationId": "updateUserInfo",
+        "description": "Atualiza as informações do usuário autenticado.",
+        "security": [
+          {
+            "userAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Atualização bem-sucedida das informações do usuário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EstimateRequest": {
+        "type": "object",
+        "required": ["type", "amount"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["buy", "sell"],
+            "description": "O tipo de transação a ser estimada."
+          },
+          "amount": {
+            "type": "number",
+            "description": "O valor para estimar a transação. Se for compra, deve ser em BRL. Se for venda, deve ser em ADA."
+          }
+        }
+      },
+      "EstimateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "Os detalhes da transação estimada."
+          }
+        }
+      },
+      "TransactionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          }
+        }
+      },
+      "CreateTransactionRequest": {
+        "type": "object",
+        "required": ["type", "amount"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["buy", "sell"],
+            "description": "O tipo de transação a ser criada."
+          },
+          "amount": {
+            "type": "number",
+            "description": "O valor para a transação."
+          }
+        }
+      },
+      "TransactionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Transaction"
+          }
+        }
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificador único para a transação."
+          },
+          "status": {
+            "type": "string",
+            "description": "Status atual da transação."
+          },
+          "type": {
+            "type": "string",
+            "enum": ["WITHDRAW", "DEPOSIT"],
+            "description": "Tipo da transação."
+          },
+          "fromAmount": {
+            "type": "number",
+            "description": "Valor na moeda de origem."
+          },
+          "toAmount": {
+            "type": "number",
+            "description": "Valor na moeda de destino."
+          },
+          "fromCurrency": {
+            "type": "string",
+            "description": "Código da moeda de origem."
+          },
+          "toCurrency": {
+            "type": "string",
+            "description": "Código da moeda de destino."
+          },
+          "addressToPay": {
+            "type": "string",
+            "description": "Endereço para enviar o pagamento (para DEPÓSITO com PIX) ou wallet cardano (para SAQUE)."
+          },
+          "addressToReceive": {
+            "type": "string",
+            "description": "Endereço para receber os fundos."
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data e hora em que a transação foi concluída."
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data e hora em que a transação expira."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data e hora da última atualização da transação."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data e hora em que a transação foi criada."
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "pixKey": {
+            "type": "string",
+            "description": "A nova chave PIX do usuário."
+          },
+          "walletAddress": {
+            "type": "string",
+            "description": "O novo endereço da carteira do usuário."
+          }
+        }
+      },
+      "UpdateUserResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identificador único para o usuário."
+          },
+          "status": {
+            "type": "string",
+            "description": "O status do usuário."
+          },
+          "name": {
+            "type": "string",
+            "description": "O nome do usuário."
+          },
+          "email": {
+            "type": "string",
+            "description": "O endereço de e-mail do usuário."
+          },
+          "contact": {
+            "type": "object",
+            "properties": {
+              "phone": {
+                "type": "string",
+                "description": "O número de telefone do usuário."
+              }
+            }
+          },
+          "kyc": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "description": "O status do KYC do usuário."
+              },
+              "statusReason": {
+                "type": "string",
+                "description": "A razão do status do KYC do usuário."
+              }
+            }
+          },
+          "payment": {
+            "type": "object",
+            "properties": {
+              "wallet": {
+                "type": "string",
+                "description": "O endereço da carteira do usuário."
+              },
+              "pix": {
+                "type": "string",
+                "description": "A chave PIX do usuário."
+              }
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Data e hora em que o usuário foi criado."
+          }
+        }
+      },
+      "CardanoQuoteResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "description": "Os detalhes da cotação da Cardano."
+          }
+        }
+      }
+    }
+  }
+}

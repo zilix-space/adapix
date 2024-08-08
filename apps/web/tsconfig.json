@@ -1,0 +1,22 @@
+{
+  "extends": "@app/tsconfig/nextjs.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "baseUrl": "."
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "../../packages/design-system/react/src/components/ui/heatmap.tsx",
+    "src/services/fiat/index.js"
+  ],
+  "exclude": [
+    "public/node_modules"
+  ]
+}

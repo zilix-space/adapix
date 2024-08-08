@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Next.js",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "strictNullChecks": false,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@design-system/react/components/ui/*": ["../../packages/design-system/react/src/components/ui/*"],
+      "@design-system/react/components/shared/*": ["../../packages/design-system/react/src/components/shared/*"],
+      "@design-system/react/hooks/*": ["../../packages/design-system/react/src/hooks/*"],
+      "@design-system/react/helpers/*": ["../../packages/design-system/react/src/helpers/*"],
+      "@design-system/react/style.scss": ["../../packages/design-system/react/src/style.scss"],
+      "@next/third-parties/google": ["./node_modules/@next/third-parties/dist/google"],
+      "@app/modules": ["../../packages/modules/src/composers/index.ts"],
+    }
+  },
+  "include": ["src", "next-env.d.ts"],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "saas-boilerplate",
+  "private": true,
+  "scripts": {
+    "start": "yarn with-env turbo start",
+    "build": "yarn with-env turbo build",
+    "clean": "git clean -xdf node_modules",
+    "clean:workspaces": "turbo clean",
+    "db:migrate:deploy": "yarn with-env turbo db:migrate:deploy",
+    "db:generate": "yarn with-env turbo db:generate",
+    "db:push": "yarn with-env turbo db:push db:generate",
+    "dev": "yarn with-env turbo dev --parallel",
+    "format": "prettier --write \"**/*.{js,cjs,mjs,ts,tsx,md,json}\" --ignore-path .gitignore",
+    "lint": "turbo lint && manypkg check",
+    "lint:fix": "turbo lint:fix && manypkg fix",
+    "type-check": "turbo type-check",
+    "with-env": "dotenv -e .env --"
+  },
+  "devDependencies": {
+    "@app/eslint-config": "*",
+    "@app/tsconfig": "*",
+    "dotenv-cli": "^7.1.0",
+    "eslint": "^8.48.0",
+    "prettier": "^3.0.3",
+    "turbo": "^1.11.2"
+  },
+  "packageManager": "yarn@1.22.10",
+  "workspaces": [
+    "apps/web",
+    "packages/**"
+  ],
+  "dependencies": {}
+}

@@ -1,0 +1,751 @@
+{
+  "id": "en",
+  "auth": {
+    "main": {
+      "button": {
+        "label": "Contact Support"
+      }
+    },
+    "footer": {
+      "rights": "All rights reserved"
+    },
+    "metadata": {
+      "title": "Sign in to",
+      "description": ["Welcome to", "Please log in."]
+    }
+  },
+  "onboarding": {
+    "getStarted": {
+      "main": {
+        "steps": {
+          "first": {
+            "title": "Basic Information",
+            "subtitle": "Before you start, we need some information about you",
+            "form": {
+              "fields": {
+                "name": {
+                  "label": "Your name",
+                  "placeholder": "Enter your name here"
+                },
+                "email": {
+                  "label": "Your email",
+                  "placeholder": "Enter your email here"
+                },
+                "phone": {
+                  "label": "Phone number",
+                  "placeholder": "Enter your phone number here"
+                },
+                "submit": {
+                  "label": "Continue"
+                }
+              }
+            }
+          },
+          "second": {
+            "title": "Create your team",
+            "subtitle": "Create your team to get started",
+            "form": {
+              "fields": {
+                "name": {
+                  "label": "Name",
+                  "placeholder": "Ex: Acme Inc"
+                },
+                "submit": {
+                  "label": "Continue"
+                }
+              }
+            }
+          }
+        }
+       
+      },
+      "metadata": {
+        "title": "Get Started"
+      }
+    }
+  },
+  "dashboard": {
+    "auth": {
+      "title": "Enter your email below to continue"
+    },
+    "sidebar": {
+      "avatar": {
+        "card": {
+          "detail": "Click to manage"
+        }
+      },
+      "sections": {
+        "main": {
+          "items": {
+            "upgrade": "Upgrade",
+            "feedback": "Feedback"
+          }
+        },
+        "dashboard": {
+          "title": "Dashboard",
+          "items": {
+            "onboarding": "Onboarding",
+            "home": "Home",
+            "plugins": "Plugins",
+            "settings": "Settings"
+          }
+        },
+        "help": {
+          "title": "Help",
+          "items": {
+            "helpCenter": "Help Center",
+            "changelog": "Changelog",
+            "blog": "Blog"
+          }
+        },
+        "upgradeCard": {
+          "items": {
+            "seats": "Seats",
+            "manageSubscription": "Manage subscription"
+          }
+        },
+        "userNav": {
+          "items": {
+            "profile": "Profile",
+            "billing": "Billing",
+            "createTeam": "Create team",
+            "homePage": "Home page",
+            "logOut": "Log out"
+          }
+        }
+      }
+    },
+    "feedback": {
+      "form": {
+        "title": "Send feedback",
+        "description": "Share your feedback, feature requests, ideas, or bug reports.",
+        "toast": {
+          "title": "Feedback Sent",
+          "description": "Your feedback has been successfully submitted. Thank you for your input!"
+        },
+        "fields": {
+          "textarea": {
+            "placeholder": "I'd like to suggest..."
+          },
+          "submit": {
+            "label": "Send feedback"
+          }
+        }
+      }
+    },
+    "onboarding": {
+      "title": "First steps",
+      "sections": {
+        "header": {
+          "incomplete": {
+            "title": "Waiting for onboarding",
+            "subtitle": ["Here you will find a guide to maximize the use of", "Follow the steps below to get started."]
+          },
+          "complete": {
+            "title": "Onboarding Completed",
+            "subtitle": "Congratulations! You have completed all the onboarding steps. Now you are ready to explore all the features of"
+          }
+        },
+        "main": {
+          "title": "Onboarding",
+          "steps": {
+            "first": {
+              "title": "Add your profile photo",
+              "description": "Add a profile photo to personalize your account"
+            },
+            "second": {
+              "title": "Invite your team",
+              "description": "Invite your team to help manage your projects"
+            },
+            "third": {
+              "title": "Upgrade plan",
+              "description": "Upgrade your plan to unlock more features"
+            }
+          }
+        },
+        "footer": {
+          "message": "Still have questions?",
+          "external": "Access our knowledge base"
+        }
+      }
+    },
+    "home": {
+      "title": "Home",
+      "main": {
+        "title": "Your Micro-SaaS start here 👋"
+      }
+    },
+    "plugins": {
+      "title": "Integrations",
+      "status": {
+        "install": "Install",
+        "installed": "Installed"
+      },
+      "notifications": {
+        "name": "Notifications",
+        "description": "Connect messengers to receive team events, such as new sales, new leads, etc.",
+        "dialog": {
+          "title": ["Install app", "Uninstall app"],
+          "help": {
+            "title": "Looking for assistance",
+            "description": "See our manual",
+            "external": "Learn more about integration"
+          }
+        },
+        "form": {
+          "clickToCopyButton": {
+            "label": "Copy",
+            "toast": {
+              "title": "Copied to Clipboard",
+              "description": "was successfully copied."
+            }
+          },
+          "submit": {
+            "label": ["Update", "Install"],
+            "toasts": {
+              "failed": {
+                "title": "Error saving the integration"
+              },
+              "success": {
+                "title": "Integration saved successfully!"
+              }
+            }
+          }
+        },
+        "integrations": {
+          "discord": {
+            "description": "Integrate with Discord to send event notifications",
+            "field": {
+              "help": "Enter the Webhook URL provided by Discord to enable notifications."
+            }
+          },
+          "slack": {
+            "description": "Integrate with Slack to send event notifications",
+            "field": {
+              "help": "The webhook URL provided by Slack when you set up an incoming webhook integration."
+            }
+          },
+          "webhook": {
+            "description": "Send event notifications to any service",
+            "field": {
+              "help": "Enter the Webhook URL where you want to receive event notifications."
+            }
+          }
+        }
+      },
+      "metadata": {
+        "title": "Integrations"
+      }
+    },
+    "settings": {
+      "sidebar": {
+        "name": "Settings",
+        "profile": "Profile",
+        "theme": "Theme",
+        "team": "Team",
+        "members": "Members",
+        "billing": "Subscription",
+        "integrations": "API Key"
+      },
+      "main": {
+        "title": "Profile",
+        "description": "Update your profile information here.",
+        "form": {
+          "toasts": {
+            "success": {
+              "title": "Success",
+              "description": "Profile updated successfully"
+            }
+          },
+          "fields": {
+            "avatar": {
+              "placeholder": "Upload photo"
+            },
+            "name": {
+              "label": "Name",
+              "placeholder": "Enter your name"
+            },
+            "username": {
+              "label": "Username",
+              "placeholder": "Enter your username",
+              "helpText": "This will be your unique identifier on our platform."
+            },
+            "email": {
+              "label": "Email",
+              "placeholder": "Enter your email",
+              "helpText": "Make sure to use a valid email address."
+            },
+            "locale": {
+              "label": "Language",
+              "placeholder": "Select your preferred language"
+            }
+          },
+          "submit": {
+            "label": "Save Changes"
+          }
+        }
+      },
+      "theme": {
+        "title": "Theme",
+        "description": "Set your application's appearance settings here.",
+        "form": {
+          "dark": "Dark",
+          "light": "Light"
+        },
+        "metadata": {
+          "title": "Theme"
+        }
+      },
+      "team": {
+        "title": "Team",
+        "description": "Adjust your team's information",
+        "form": {
+          "toasts": {
+            "success": {
+              "title": "Success",
+              "description": "Team updated successfully"
+            }
+          },
+          "fields": {
+            "avatar": {
+              "placeholder": "Upload photo"
+            },
+            "name": {
+              "label": "Name",
+              "placeholder": "John Doe"
+            }
+          },
+          "submit": {
+            "label": "Save Changes"
+          }
+        },
+        "metadata": {
+          "title": "Team"
+        }
+      },
+      "members": {
+        "title": "Members",
+        "description": "Manage your team members",
+        "form": {
+          "title": "Invite member",
+          "description": "Invite a member to your site.",
+          "toasts": {
+            "success": {
+              "title": "Member invited successfully",
+              "description": "The invitation has been sent to"
+            },
+            "failed": {
+              "title": "Error inviting member!",
+              "description": "An error occurred while inviting the member."
+            }
+          },
+          "fields": {
+            "email": {
+              "label": "Email",
+              "placeholder": "john@doe.com",
+              "description": "We will send the invitation by email."
+            },
+            "submit": {
+              "label": "Add"
+            }
+          }
+        },
+        "main": {
+          "tabs": {
+            "members": {
+              "label": "Members",
+              "card": {
+                "deleteMember": {
+                  "alertConfirmation": "Are you sure you want to delete this member?",
+                  "toasts": {
+                    "success": {
+                      "title": "Member successfully deleted!"
+                    },
+                    "failed": {
+                      "title": "An error occurred while deleting the member."
+                    }
+                  },
+                  "button": {
+                    "title": "Delete"
+                  }
+                }
+              }
+            },
+            "invites": {
+              "label": "Invites",
+              "card": {
+                "description": ["Accepted", "Sent and awaiting acceptance"],
+                "deleteInvite": {
+                  "alertConfirmation": "Are you sure you want to delete this invite?",
+                  "toasts": {
+                    "success": {
+                      "title": "Invite deleted successfully!"
+                    },
+                    "failed": {
+                      "title": "An error occurred while deleting the invite."
+                    }
+                  },
+                  "button": {
+                    "delete": {
+                      "title": "Delete invite"
+                    }
+                  }
+                },
+                "copyInvite": {
+                  "toasts": {
+                    "success": {
+                      "title": "Invite copied successfully!",
+                      "description": "Now just send it to your friend."
+                    }
+                  },
+                  "button": {
+                    "copy": {
+                      "title": "Copy invite"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "submit": {
+            "label": "Invite member"
+          },
+          "emptyStates": {
+            "members": {
+              "title": "No Members Found",
+              "description": "There are currently no members in your team. Invite members to get started."
+            },
+            "invites": {
+              "title": "No Invites Found",
+              "description": "There are currently no invites in your team. Invite members to get started."
+            }
+          }
+        },
+        "metadata": {
+          "title": "Members"
+        }
+      },
+      "billing": {
+        "title": "Subscription",
+        "description": "Check your monthly usage",
+        "form": {
+          "fields": {
+              "currentPlan": {
+                "label": "Current plan",
+                "paymentInterval": {
+                  "month": "month",
+                  "annual": "annual"
+                },
+                "upTo": "Up to"
+              },
+              "newPlan": {
+                "paymentInterval": {
+                  "month": "month",
+                  "annual": "annual"
+                },
+                "upTo": "Up to"
+              },
+              "external": {
+                "label": "Manage my plan"
+              },
+            "changePlan": {
+              "label": "Change plan",
+              "description": {
+                "annual": "Annual billing",
+                "monthly": "Monthly billing"
+              }
+            }
+          }
+        }
+      },
+      "integrations": {
+        "title": "API Key",
+        "description": "Manage your account API Key",
+        "form": {
+          "messages": {
+            "confirmRegenerateToken": "Are you sure you want to regenerate the token?"
+          },
+          "fields": {
+            "apiKey": {
+              "label": "API Key"
+            },
+            "documentation": {
+              "label": "Documentation",
+              "description": ["Explore our documentation for concise guides and resources on using", "It's a great starting point for both new and seasoned users to enhance their experience with our platform's features."],
+              "external": "Documentation"
+            },
+            "alert": {
+              "description": "No token available"
+            }
+          }
+        },
+        "metadata": {
+          "title": "API Key"
+        }
+      }
+    },
+    "metadata": {
+      "title": "Home"
+    }
+  },
+  "site": {
+    "title": "Transform Your Project into a Successful Micro-SaaS",
+    "description": "Accelerate your business growth with our platform – the perfect solution to launch your Micro-SaaS effortlessly.",
+    "layout": {
+      "header": {
+        "nav": {
+          "start": "Start",
+          "features": "Features",
+          "pricing": "Pricing",
+          "blog": "Blog",
+          "changelog": "Changelog",
+          "button": {
+            "label": "Sign In"
+          },
+          "ctaButton": {
+            "label": "Get Started"
+          }
+        }
+      },
+      "footer": {
+        "rights": "All rights reserved",
+        "terms": "Terms of Service",
+        "privacy": "Privacy Policy"
+      }
+    },
+      "sections": {
+        "hero": {
+          "title": "Transform Your Project into a Successful Micro-SaaS",
+          "subtitle": "Accelerate your business growth with our platform – the perfect solution to launch your Micro-SaaS effortlessly.",
+          "description": "No credit card required"
+        },
+        "features": {
+        "header": {
+          "badge": "Core Features",
+          "title": "Power Up Your Micro-SaaS with Essential Tools",
+          "description": "Elevate your Micro-SaaS platform with a robust stack including Next 14, Next Auth, Prisma, Zod, React Hook Form, and essential functionalities like Plugins, Stripe Subscriptions, Authentication, Blog, Changelog, Dashboard, and Team System."
+        },
+        "main": {
+          "features": {
+            "first": {
+              "title": "Seamless Authentication",
+              "description": "Secure and streamline user access with Next Auth. Implement hassle-free authentication processes to enhance user experience and security."
+          },
+            "second": {
+              "title": "Effortless Subscription Management",
+              "description": "Integrate Stripe Subscriptions seamlessly. Manage billing, subscriptions, and payments with ease, providing a smooth experience for both you and your users."
+          },
+            "third": {
+              "title": "Comprehensive Dashboard",
+              "description": "Gain insights and manage your platform with an intuitive dashboard. Collaborate effectively with a built-in team system, enhancing productivity and workflow."
+          }
+        }
+        }
+      },
+      "morePossibilities": {
+        "header": {
+          "badge": "Explore More Features",
+          "title": "Discover the full potential of Boilerplate"
+        },
+        "main": {
+          "features": [
+            {
+              "title": "Simplified Authentication",
+              "description": "Leverage Next Auth for secure, hassle-free user authentication processes, enhancing both user experience and platform security."
+            },
+            {
+              "title": "Stripe Subscriptions Integration",
+              "description": "Easily manage billing, subscriptions, and payments through Stripe, offering a seamless financial experience for your users."
+            },
+            {
+              "title": "Extensible with Plugins",
+              "description": "Expand your platform’s capabilities with plugins, allowing for customizable features tailored to your users’ needs."
+            },
+            {
+              "title": "Dynamic Content Creation",
+              "description": "Utilize our blogging feature to engage your audience with fresh content, keeping them informed and connected to your platform."
+            },
+            {
+              "title": "Real-Time Dashboard Analytics",
+              "description": "Monitor your platform’s performance with a comprehensive dashboard, providing real-time analytics for informed decision-making."
+            },
+            {
+              "title": "Collaborative Team System",
+              "description": "Enhance productivity and collaboration with a built-in team system, streamlining workflows and project management."
+            }
+          ]
+        }
+      },
+      "pricing": {
+        "header": {
+          "badge": "Pricing",
+          "title": ["Maximize Lead Generation", "with Transparent Pricing."],
+          "description": "Unlock the full potential of every link with Use Link's pricing plans designed for businesses of all sizes. Select the package that best suits your lead generation goals."
+        },
+        "main": {
+          "submit": {
+            "label": "Get Started"
+          }
+        },
+        "metadata": {
+          "title": "Pricing",
+          "description": "Information about our pricing plans and options"
+        }
+      },
+      "efficiency": {
+        "header": {
+          "title": "Suite with Amazing Toolset for your SaaS"
+        },
+        "main": {
+          "description": "Unlock cost savings, revenue growth, and operational efficiency with our integrated and comprehensive SaaS Boilerplate. Harness the power of SaaS processes, manage software operations, and optimize your business",
+          "details": ["speed increase", "time-to-dev", "time-to-ship"]
+        }
+      },
+      "firstFeatured": {
+        "header": {
+          "title": "Next level with NextJS",
+          "description": "Integration with NextJS 14 App Folder and Server Actions"
+        },
+        "main": {
+          "description": " Discover efficiency and ease of integration with the new features of NextJS 14, including the App Folder and Server Actions."
+        },
+        "button": {
+          "label": "Get Started"
+        }
+      },
+      "secondFeatured": {
+        "header": {
+          "title": "Type Safety",
+          "description": "Integration with TypeScript in the SaaS Boilerplate for Type Safety"
+        },
+        "main": {
+          "description": "Discover efficiency and ease of integration with TypeScript features, ensuring type safety in your SaaS Boilerplate."
+        },
+        "button": {
+          "label": "Get Started"
+        }
+      },
+      "posts": {
+        "postSocialBar": {
+          "buttons": {
+            "next": {
+              "label": "Next"
+            },
+            "previous": {
+              "label": "Previous"
+            }
+          }
+        },
+        "postWrapper": {
+          "aside": {
+            "writtenBy": "Written By",
+            "readMore": "Read More"
+          }
+        }
+      },
+      "faq": {
+        "header": {
+          "title": "Frequently Asked Questions",
+          "description": "Find answers to the most common questions about Boilerplate"
+        },
+        "main": {
+          "questions": [
+            {
+              "title": "What is this Micro-SaaS Boilerplate?",
+              "content": "This Micro-SaaS Boilerplate is a comprehensive starting point for building your own Micro-SaaS applications. It leverages the latest technologies including Next 14, Next Auth, Prisma, Zod, and React Hook Form to provide a robust foundation for your project."
+            },
+            {
+              "title": "What features does this Boilerplate include?",
+              "content": "The Boilerplate comes packed with essential features for any SaaS application, including plugin support, Stripe Subscriptions for handling payments, user authentication, a blogging platform, a changelog feature, a comprehensive dashboard, and a team system for collaboration."
+            },
+            {
+              "title": "Can I customize the Boilerplate?",
+              "content": "Absolutely, the Boilerplate is designed to be fully customizable. You can tailor the design, functionality, and features to meet the specific needs of your project, ensuring your application stands out."
+            },
+            {
+              "title": "How does authentication work?",
+              "content": "Authentication is handled through Next Auth, providing secure and seamless user authentication. This allows for easy management of user sessions and supports various authentication providers."
+            },
+            {
+              "title": "How can I manage subscriptions and payments?",
+              "content": "Stripe Subscriptions are integrated into the Boilerplate, enabling you to manage billing, subscriptions, and payments effortlessly. This provides a smooth financial transaction experience for both you and your users."
+            },
+            {
+              "title": "Is there support for team collaboration?",
+              "content": "Yes, the Boilerplate includes a team system feature that enhances productivity and collaboration. It allows team members to work together efficiently, streamlining workflows and project management."
+            },
+            {
+              "title": "How do I track the performance of my application?",
+              "content": "The Boilerplate features a comprehensive dashboard that offers real-time analytics, allowing you to monitor your application’s performance, user engagement, and other key metrics to inform decision-making and strategy optimization."
+            },
+            {
+              "title": "How do I get started with this Micro-SaaS Boilerplate?",
+              "content": "Getting started is straightforward. Simply clone the Boilerplate repository, configure it according to your project’s requirements, and you’re ready to start building your Micro-SaaS application. Our documentation and support team are here to assist you throughout the process."
+            }
+          ]
+        }
+      },
+      "cta": {
+        "title": "Elevate Your Micro-SaaS with SaaS Boilerplate",
+        "description": "Unlock the full potential of your Micro-SaaS with our cutting-edge stack including Next 14, Next Auth, Prisma, Zod, and React Hook Form.",
+        "ctaButton": {
+          "label": "Get Started"
+        }
+      },
+      "changelog": {
+        "title": " All the latest updates, improvements, and fixes to",
+        "metadata": {
+          "title": "Changelog",
+          "description": "All the latest updates, improvements, and fixes to"
+        }
+      },
+      "blog": {
+        "title": "Latest news and updates from",
+        "subscribeToUpdates": "Subscribe to update",
+        "metadata": {
+          "title": "Blog",
+          "description": "Latest news and updates from"
+        }
+      }
+    },
+    "breadcrumb": {
+      "backButton": {
+        "label": "Back"
+      }
+    }
+  },
+  "shared": {
+    "toasts": {
+      "acceptInvite": {
+        "failed": {
+          "title": "Erro ao aceitar convite!",
+          "description": "Ocorreu um erro ao aceitar o convite."
+        }
+      },
+      "declineInvite": {
+        "failed": {
+          "title": "Erro ao recusar convite!",
+          "description": "Ocorreu um erro ao recusar o convite."
+        }
+      }
+    },
+    "main": {
+      "title": "invited you to manage a team.",
+      "buttons": {
+        "accept": {
+          "label": "Accept"
+        },
+        "decline": {
+          "label": "Decline"
+        }
+      }
+    },
+    "footer": {
+      "rights": "All rights reserved."
+    },
+    "metadata": {
+      "title": "Accept invitation"
+    }
+  }
+}
+
