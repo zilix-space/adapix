@@ -15,51 +15,11 @@ function deleteTenantCookies(response: NextResponse) {
   response.cookies.delete('x-tenant')
 }
 
+const tokens = {
+  sessions: ['next-auth.session-token', '__Secure-next-auth.session-token'],
+}
 export default function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname
-  const token =
-    req.cookies.get('next-auth.session-token')?.value ||
-    req.cookies.get('__Secure-next-auth.session-token')?.value
-
-  // Handle session expiration
-  if (pathname === '/auth/session-expired') {
-    const response = redirectTo('/auth')
-    deleteSessionCookies(response)
-    response.headers.set('x-pathname', pathname)
-    return response
-  }
-
-  // Redirect authenticated users trying to access /auth
-  if (pathname === '/auth' && token) {
-    return redirectTo('/app')
-  }
-
-  // Redirect unauthenticated users trying to access /app routes
-  if (!token && pathname.startsWith('/app')) {
-    const response = redirectTo(`/auth?callbackUrl=${pathname}`)
-    if (pathname.startsWith('/app/invites')) {
-      const inviteId = pathname.split('/').pop()
-      if (isValidUUID(inviteId)) {
-        response.cookies.set('x-tenant-invite', inviteId)
-      }
-    }
-    return response
-  }
-
-  // Handle tenant selection
-  if (pathname.startsWith('/app/select-account')) {
-    const tenantId = pathname.split('/').pop()
-    if (isValidUUID(tenantId)) {
-      const response = redirectTo('/app')
-      response.cookies.set('x-tenant', tenantId)
-      response.headers.set('x-pathname', pathname)
-      return response
-    } else {
-      const response = redirectTo('/app')
-      deleteTenantCookies(response)
-      return response
-    }
-  }
 
   // For all other cases, proceed with the request
   const response = NextResponse.next()

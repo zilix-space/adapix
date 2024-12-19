@@ -36,16 +36,19 @@ import {
   TableHeader,
   TableRow,
 } from './table'
+import { cn } from '../../helpers/cn'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   searchField?: string
+  className?: string
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  className,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -75,10 +78,10 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <section className="h-full flex flex-col">
+    <section className={cn(['h-full flex flex-col', className])}>
       <main className="">
         <Table>
-          <TableHeader className="bg-secondary">
+          <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -126,7 +129,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </main>
-      <footer className="flex items-center justify-between space-x-2 h-[4.56rem] mt-auto border-t border-border px-8">
+      <footer className="sticky bottom-0 flex items-center justify-between space-x-2 h-[4.56rem] mt-auto border-t border-border px-8">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{' '}
           {table.getFilteredRowModel().rows.length} iten(s) selected.

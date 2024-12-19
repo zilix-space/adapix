@@ -10,10 +10,14 @@ declare module 'next-auth/jwt' {
 
 declare module 'next-auth' {
   interface Session {
-    user: UserModel
+    user: UserModel & {
+      role: 'ADMIN' | 'USER'
+    }
   }
 }
 
 declare module 'next-auth' {
-  interface User extends UserModel {}
+  interface User extends UserModel {
+    role: 'ADMIN' | 'USER'
+  }
 }

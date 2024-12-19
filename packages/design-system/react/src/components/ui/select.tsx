@@ -3,8 +3,38 @@
 import * as SelectPrimitive from '@radix-ui/react-select'
 import { Check, ChevronDown } from 'lucide-react'
 import * as React from 'react'
-
+import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../../helpers/cn'
+
+const selectTrigger = cva(
+  'flex w-full items-center justify-between rounded-md text-black dark:text-white ring-offset-background placeholder:text-black/40 dark:placeholder:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
+  {
+    variants: {
+      size: {
+        default: 'h-10 px-4 py-2',
+        sm: 'h-9 px-3',
+        lg: 'h-11 px-8',
+      },
+      variant: {
+        solid: ['bg-black/5 dark:bg-white/5 border border-border px-4 py-3'],
+        outline: [
+          'bg-transparent',
+          'border',
+          'border-input',
+          'shadow-sm',
+          'px-4 py-3',
+        ],
+        transparent: [
+          'border-transparent',
+          'bg-transparent',
+          '!h-fit px-0',
+          'focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:ring-offset-transparent focus-visible:ring-transparent focus-visible:ring-offset-transparent',
+        ],
+      },
+    },
+    defaultVariants: { size: 'default', variant: 'transparent' },
+  },
+)
 
 const Select = SelectPrimitive.Root
 
@@ -12,16 +42,16 @@ const SelectGroup = SelectPrimitive.Group
 
 const SelectValue = SelectPrimitive.Value
 
+type SelectTriggerProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> & 
+  VariantProps<typeof selectTrigger>
+
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  SelectTriggerProps
+>(({ className, children, size, variant, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn(
-      'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-      className,
-    )}
+    className={cn(selectTrigger({ size, variant, className }))}
     {...props}
   >
     {children}
@@ -112,4 +142,3 @@ SelectSeparator.displayName = SelectPrimitive.Separator.displayName
 export {
     Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue
 }
-

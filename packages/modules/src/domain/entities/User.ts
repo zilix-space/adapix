@@ -50,6 +50,7 @@ export interface User {
   emailVerified: boolean
   username: string
   status: 'PENDING' | 'ACTIVE' | 'BLOCKED'
+  role: 'USER' | 'ADMIN'
   image?: string
 
   settings: UserSettings

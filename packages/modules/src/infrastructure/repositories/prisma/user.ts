@@ -44,7 +44,7 @@ export class PrismaUserRepository implements IUserRepository {
         name: data.name,
         username: data.username,
         image: data.image,
-        settings: data.settings,
+        settings: data.settings as any,
       },
     })
 
@@ -54,6 +54,7 @@ export class PrismaUserRepository implements IUserRepository {
   private toDomain(model: any): User {
     return {
       id: model.id,
+      role: model.role,
       email: model.email,
       name: model.name,
       emailVerified: model.emailVerified,
