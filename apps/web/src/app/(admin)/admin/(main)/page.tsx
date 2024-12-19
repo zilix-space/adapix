@@ -16,6 +16,14 @@ import {
 } from '@design-system/react/components/ui/tabs'
 import type { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
+export const dynamicParams = true
+
+/**
+ * Metadata for the admin dashboard page
+ */
 export const metadata: Metadata = {
   title: 'Dashboard | Admin',
   description: 'Monitor and manage all activities in the admin dashboard.',

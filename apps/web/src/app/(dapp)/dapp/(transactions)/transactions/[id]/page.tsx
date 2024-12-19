@@ -9,9 +9,10 @@ type PageProps = {
   }
 }
 
-export const revalidate = 0
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store'
+export const revalidate = 0
+export const dynamicParams = true
 
 export default async function Page({ params }: PageProps) {
   const transaction = await getTransactionByIdAction({ id: params.id })

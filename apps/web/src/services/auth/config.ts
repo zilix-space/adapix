@@ -10,7 +10,6 @@ import { renderAsync } from '@react-email/components'
 import { NextAuthOptions } from 'next-auth'
 import { db } from '../db'
 import { modules } from '@app/modules/src'
-import { indier } from '../indier'
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(db),
@@ -56,24 +55,6 @@ export const authOptions: NextAuthOptions = {
     },
   },
   events: {
-    async signIn(message) {
-      console.log(message.user)
-
-      await indier.analytics.event.create({
-        event: 'user-signed-in',
-        channel: 'user-journey',
-        title: 'User Signed In',
-        description: `User ${message.user.email} signed in`,
-        icon: '🔒',
-        identity: {
-          identityId: message.user.id,
-          email: message.user.email,
-          name: message.user.name,
-          phone: message.user.settings.contact.phone,
-          image: message.user.image,
-        },
-      })
-    },
     async createUser(message) {
       await modules.provider.mail.send({
         from: APP_CONFIGS.providers.mail.resend.from,
@@ -85,21 +66,6 @@ export const authOptions: NextAuthOptions = {
             name: message.user.name,
           }),
         ),
-      })
-
-      await indier.analytics.event.create({
-        event: 'user-created',
-        channel: 'user-journey',
-        title: 'New User',
-        description: `User ${message.user.email} created an account`,
-        icon: '🚀',
-        identity: {
-          identityId: message.user.id,
-          email: message.user.email,
-          name: message.user.name,
-          phone: message.user.settings.contact.phone,
-          image: message.user.image,
-        },
       })
     },
   },

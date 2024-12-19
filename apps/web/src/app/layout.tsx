@@ -13,6 +13,10 @@ import CrispChat from './_components/crisp'
 import { LocaleProvider } from '@/services/internationalization/contexts/locale.context'
 import { ApplicationProvider } from '@/contexts/app.context'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+export const dynamicParams = true
+
 export const metadata = {
   title: {
     template: `${APP_CONFIGS.app.name} · %s`,

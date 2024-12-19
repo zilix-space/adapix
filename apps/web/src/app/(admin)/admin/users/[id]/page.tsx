@@ -19,6 +19,12 @@ import { UserStats } from './_components/user-stats'
 import { DataTable } from '../../_components/data-display/data-table'
 import { columns } from './_components/columns'
 import { UserBaseInfoSection } from './_components/user-base-info-section'
+import type { Metadata } from 'next'
+
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
+export const dynamicParams = true
 
 /**
  * User details page props
@@ -27,6 +33,14 @@ interface UserDetailsPageProps {
   params: {
     id: string
   }
+}
+
+/**
+ * Metadata for the user details page
+ */
+export const metadata: Metadata = {
+  title: 'User Details | Admin',
+  description: 'View detailed information about a user.',
 }
 
 /**

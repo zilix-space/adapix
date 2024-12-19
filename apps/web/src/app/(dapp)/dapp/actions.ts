@@ -9,7 +9,6 @@ import {
 } from './schemas'
 import { modules } from '@app/modules/src'
 import { z } from 'zod'
-import { indier } from '@/services/indier'
 import { formatCurrency } from '@/helpers/format-currency'
 import { APP_CONFIGS } from '@/boilerplate.config'
 import { renderAsync } from '@react-email/components'
@@ -41,34 +40,6 @@ export const createTransactionAction = client.action({
           transaction,
         }),
       ),
-    })
-
-    await indier.analytics.event.create({
-      event: 'transaction-created',
-      channel: 'user-journey',
-      title: 'New Transaction',
-      description: `A new ${input.type} transaction was created by @${context.user.username}`,
-      icon: '🚀',
-      identity: {
-        identityId: '',
-        email: context.user.email,
-        name: context.user.name,
-        phone: context.user.settings.contact.phone,
-        image: context.user.image,
-      },
-      properties: {
-        id: transaction.id,
-        type: transaction.type,
-
-        from: formatCurrency(transaction.fromAmount, transaction.fromCurrency),
-        to: formatCurrency(transaction.toAmount, transaction.toCurrency),
-
-        exchangeId: transaction.exchangeId,
-        exchangeAddress: transaction.exchangeAddress,
-
-        paymentId: transaction.paymentId,
-        paymentAddress: transaction.paymentAddress,
-      },
     })
 
     return transaction

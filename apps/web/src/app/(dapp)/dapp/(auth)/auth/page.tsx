@@ -6,6 +6,11 @@ import {
 } from '@design-system/react/components/ui/widget-stepper'
 import { AuthForm } from './_components/auth-form'
 
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
+export const dynamicParams = true
+
 export default function Page() {
   return (
     <WidgetStepper>

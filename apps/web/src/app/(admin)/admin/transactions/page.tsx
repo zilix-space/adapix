@@ -9,6 +9,11 @@ import { columns } from './_components/columns'
 import { TransactionFilters } from './_components/transaction-filters'
 import type { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
+export const dynamicParams = true
+
 /**
  * Props for the TransactionsPage component
  */
@@ -50,7 +55,3 @@ export const metadata: Metadata = {
   description:
     'Monitor and manage all transactions, including deposits, withdrawals, and their statuses.',
 }
-
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-export const dynamicParams = true

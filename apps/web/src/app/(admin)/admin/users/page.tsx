@@ -9,6 +9,10 @@ import { columns } from './_components/columns'
 import { UserFilters } from './_components/user-filters'
 import type { Metadata } from 'next'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+export const dynamicParams = true
+
 /**
  * Props for the UsersPage component
  */
@@ -48,7 +52,3 @@ export const metadata: Metadata = {
   description:
     'Manage and monitor user accounts, KYC status, and user settings.',
 }
-
-export const dynamic = 'force-dynamic'
-export const revalidate = 0
-export const dynamicParams = true

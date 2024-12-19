@@ -3,7 +3,6 @@
 import { client } from '@/services/actions/user-client'
 import { updateUserDocumentWithSelfieKycSchema } from './schema'
 import { modules } from '@app/modules/src'
-import { indier } from '@/services/indier'
 import { KYCStatus } from '@app/modules/src/domain/entities/User'
 
 export const updateUserDocumentWithSelfieKyc = client.action({
@@ -23,21 +22,6 @@ export const updateUserDocumentWithSelfieKyc = client.action({
             },
           },
         },
-      },
-    })
-
-    await indier.analytics.event.create({
-      event: 'onboarding-finished',
-      channel: 'user-journey',
-      title: 'Onboarding Finished',
-      description: `Onboarding finished for @${context.user.username}`,
-      icon: '🧡',
-      identity: {
-        identityId: '',
-        email: context.user.email,
-        name: context.user.name,
-        phone: context.user.settings.contact.phone,
-        image: context.user.image,
       },
     })
 
