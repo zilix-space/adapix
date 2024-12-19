@@ -1,6 +1,6 @@
 'use client'
 
-import { useApplication } from '@/app/app/_hooks/application.hook'
+import { useApplication } from '@/hooks/use-application'
 import { useActionForm } from '@/services/actions/lib/client'
 import { Button, ButtonIcon } from '@design-system/react/components/ui/button'
 import {

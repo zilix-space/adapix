@@ -20,7 +20,7 @@ import {
 } from '../../../_components/dapp-page'
 import { Button, ButtonIcon } from '@design-system/react/components/ui/button'
 import { updateUserPhoneKyc } from './actions'
-import { useApplication } from '@/app/app/_hooks/application.hook'
+import { useApplication } from '@/hooks/use-application'
 import { PhoneInput } from '@design-system/react/components/ui/phone-input'
 import { ArrowRightIcon } from 'lucide-react'
 

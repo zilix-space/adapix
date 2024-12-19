@@ -76,10 +76,23 @@
                             "type": "object",
                             "properties": {
                               "status": {
-                                "type": "string"
+                                "type": "string",
+                                "enum": ["pending", "approved", "rejected", "submitted"]
                               },
-                              "statusReason": {
-                                "type": "string"
+                              "reasons": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "enum": [
+                                    "invalid_selfie",
+                                    "invalid_selfie_with_document", 
+                                    "invalid_document_front",
+                                    "invalid_document_back",
+                                    "invalid_address",
+                                    "invalid_data",
+                                    "suspicious_data"
+                                  ]
+                                }
                               },
                               "data": {
                                 "type": "object"

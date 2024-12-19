@@ -15,17 +15,29 @@ import { useCallback, useEffect, useState } from 'react'
 import { useDebouncedCallback } from 'use-debounce'
 
 /**
- * TransactionFilters component that handles search and filter parameters
+ * Interface for the TransactionFilters component props
+ */
+interface TransactionFiltersProps {
+  defaultSearchParams: {
+    search?: string
+    status?: string
+    type?: string
+  }
+}
+
+/**
+ * TransactionFilters component that handles search and filter parameters for the transactions page
  */
 export function TransactionFilters({
   defaultSearchParams,
-}: {
-  defaultSearchParams: { search?: string; status?: string; type?: string }
-}) {
+}: TransactionFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
+  /**
+   * Get search parameter value from URL or default params
+   */
   function getSearchParam(key: string) {
     return (
       searchParams.get(key) ||
@@ -41,7 +53,7 @@ export function TransactionFilters({
    * Creates new URLSearchParams with current filters
    */
   const createQueryString = useCallback(
-    (params: Record<string, string>) => {
+    (params: Record<string, string | null>) => {
       const newSearchParams = new URLSearchParams(searchParams.toString())
 
       Object.entries(params).forEach(([key, value]) => {
@@ -58,7 +70,18 @@ export function TransactionFilters({
   )
 
   /**
-   * Get default search params
+   * Update URL with new search parameters
+   */
+  const updateUrl = useCallback(
+    (params: Record<string, string | null>) => {
+      const queryString = createQueryString(params)
+      router.push(`${pathname}?${queryString}`, { scroll: false })
+    },
+    [createQueryString, pathname, router],
+  )
+
+  /**
+   * Get default search params on mount and when they change
    */
   useEffect(() => {
     setSearch(getSearchParam('search'))
@@ -70,8 +93,7 @@ export function TransactionFilters({
    * Debounced function to update URL with search parameter
    */
   const debouncedSearchUpdate = useDebouncedCallback((value: string) => {
-    const queryString = createQueryString({ search: value })
-    router.push(`${pathname}?${queryString}`)
+    updateUrl({ search: value || null })
   }, 500)
 
   /**
@@ -87,8 +109,7 @@ export function TransactionFilters({
    */
   const handleStatusChange = (value: string) => {
     setStatus(value)
-    const queryString = createQueryString({ status: value })
-    router.push(`${pathname}?${queryString}`)
+    updateUrl({ status: value || null })
   }
 
   /**
@@ -96,8 +117,7 @@ export function TransactionFilters({
    */
   const handleTypeChange = (value: string) => {
     setType(value)
-    const queryString = createQueryString({ type: value })
-    router.push(`${pathname}?${queryString}`)
+    updateUrl({ type: value || null })
   }
 
   return (
@@ -105,7 +125,7 @@ export function TransactionFilters({
       <div className="flex items-center gap-2">
         <Input
           placeholder="Search transactions..."
-          value={search}
+          value={search || ''}
           onChange={(e) => handleSearchChange(e.target.value)}
           className="max-w-sm"
         />
@@ -115,7 +135,7 @@ export function TransactionFilters({
             variant="outline"
             size="sm"
             onClick={() => handleStatusChange('')}
-            className="gap-2 rounded-full"
+            className="gap-2 rounded-full capitalize"
           >
             {status}
             <XIcon className="w-4 h-4" />
@@ -126,7 +146,7 @@ export function TransactionFilters({
             variant="outline"
             size="sm"
             onClick={() => handleTypeChange('')}
-            className="gap-2 rounded-full"
+            className="gap-2 rounded-full capitalize"
           >
             {type}
             <XIcon className="w-4 h-4" />
@@ -135,7 +155,7 @@ export function TransactionFilters({
       </div>
 
       <div className="flex items-center gap-4">
-        <Select value={status} onValueChange={handleStatusChange}>
+        <Select value={status || ''} onValueChange={handleStatusChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
@@ -148,7 +168,7 @@ export function TransactionFilters({
           </SelectContent>
         </Select>
 
-        <Select value={type} onValueChange={handleTypeChange}>
+        <Select value={type || ''} onValueChange={handleTypeChange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Filter by type" />
           </SelectTrigger>

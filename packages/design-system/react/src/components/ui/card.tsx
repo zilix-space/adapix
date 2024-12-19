@@ -92,7 +92,7 @@ const CardIcon = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn('flex items-center justify-center rounded-md h-9 w-9 border borer-border bg-black/5 dark:bg-white/5', className)}
+    className={cn('flex items-center justify-center rounded-md h-9 w-9 border borer-border bg-black/5 dark:bg-background/5', className)}
     {...props}
   />
 ))

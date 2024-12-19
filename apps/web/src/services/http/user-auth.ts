@@ -17,7 +17,7 @@ type Auth = {
 
     kyc: {
       status: string
-      statusReason: string
+      reasons: string[]
     }
 
     payment: {
@@ -91,12 +91,6 @@ export const userAuthMiddleware: ApiMiddleware<
     createdAt: string
   }
 
-  console.log({
-    userSenderChannel,
-    userPhone,
-    user,
-  })
-
   if (!user || !user.id) {
     throw new HttpResponseError({
       status: 403,
@@ -113,7 +107,7 @@ export const userAuthMiddleware: ApiMiddleware<
       pending:
         'A documentação deste usuário ainda não foi enviada. Por favor, peça para ele se cadastrar no link fornecido.',
       rejected:
-        'Este usuário não foi aprovado para usar o AdaPix. Ele precisa reenviar a documentação para análise. O motivo está no payload.',
+        'Este usuário não foi aprovado para usar o AdaPix. Ele precisa reenviar a documentação para análise. Os motivos podem ser: selfie inválida, selfie com documento inválida, frente do documento inválida, verso do documento inválido, endereço inválido, dados inválidos ou dados suspeitos.',
       submitted:
         'A documentação deste usuário está em análise. A aprovação deve ocorrer em até 48 horas.',
     }
@@ -122,7 +116,7 @@ export const userAuthMiddleware: ApiMiddleware<
       status: 403,
       message: messages[user.settings.kyc.status as keyof typeof messages],
       data: {
-        reason: user.settings.kyc.statusReason,
+        reasons: user.settings.kyc.reasons,
         url: `${process.env.NEXT_PUBLIC_APP_URL}dapp/auth`,
       },
     })
@@ -136,7 +130,7 @@ export const userAuthMiddleware: ApiMiddleware<
 
     kyc: {
       status: user.settings.kyc.status,
-      statusReason: user.settings.kyc.statusReason,
+      reasons: user.settings.kyc.reasons,
     },
 
     payment: {

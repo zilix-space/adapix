@@ -4,6 +4,7 @@ import { client } from '@/services/actions/user-client'
 import { updateUserDocumentWithSelfieKycSchema } from './schema'
 import { modules } from '@app/modules/src'
 import { indier } from '@/services/indier'
+import { KYCStatus } from '@app/modules/src/domain/entities/User'
 
 export const updateUserDocumentWithSelfieKyc = client.action({
   name: 'user.kyc.update',
@@ -15,7 +16,7 @@ export const updateUserDocumentWithSelfieKyc = client.action({
     await modules.usecases.user.updateUser.execute(user.id, {
       settings: {
         kyc: {
-          status: 'submitted',
+          status: KYCStatus.SUBMITTED,
           data: {
             attachments: {
               selfie: input.selfie,

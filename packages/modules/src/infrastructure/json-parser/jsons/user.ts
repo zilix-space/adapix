@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { KYCRejectionReason, KYCStatus } from '../../../domain/entities/User'
 
 export const userSettingsSchema = z.object({
   contact: z.object({
@@ -17,8 +18,8 @@ export const userSettingsSchema = z.object({
     wallet: z.string().optional(),
   }),
   kyc: z.object({
-    status: z.enum(['pending', 'approved', 'rejected', 'submitted']),
-    statusReason: z.string().optional(),
+    status: z.nativeEnum(KYCStatus),
+    reasons: z.array(z.nativeEnum(KYCRejectionReason)).optional(),
     data: z.object({
       name: z.string().optional(),
       document: z.string().optional(),
@@ -59,8 +60,8 @@ export const userSettingsDefault: z.infer<typeof userSettingsSchema> = {
     wallet: '',
   },
   kyc: {
-    status: 'pending',
-    statusReason: '',
+    status: KYCStatus.PENDING,
+    reasons: [],
     data: {
       name: '',
       document: '',

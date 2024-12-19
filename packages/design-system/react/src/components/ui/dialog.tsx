@@ -61,7 +61,7 @@ const DialogHeader = ({
     <div className="flex-col space-y-1.5 text-left sm:text-left">
       {children}
     </div>
-    <DialogPrimitive.Close className="h-9 w-9 flex items-center justify-center rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+    <DialogPrimitive.Close className="h-9 w-9 flex items-center justify-center rounded-full bg-black/5 dark:bg-background/5 hover:bg-black/10 dark:hover:bg-background/10 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
       <X className="h-4 w-4" />
       <span className="sr-only">Close</span>
     </DialogPrimitive.Close>

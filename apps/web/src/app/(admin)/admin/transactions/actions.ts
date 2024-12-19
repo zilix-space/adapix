@@ -1,9 +1,9 @@
 'use server'
 
 import { db } from '@app/db'
-import { client } from '@/services/actions/admin-client'
 import { z } from 'zod'
 import type { Transaction } from './_components/columns'
+import { client } from '@/services/actions/admin-client'
 
 /**
  * Get all transactions from the database with filters
@@ -50,6 +50,8 @@ export const getTransactions = client.action({
             name: true,
             email: true,
             image: true,
+            role: true,
+            settings: true,
           },
         },
       },
@@ -83,6 +85,8 @@ export const getTransactionById = client.action({
             name: true,
             email: true,
             image: true,
+            role: true,
+            settings: true,
           },
         },
       },

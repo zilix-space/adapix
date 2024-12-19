@@ -43,12 +43,14 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   searchField?: string
   className?: string
+  isFooterSticky?: boolean
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   className,
+  isFooterSticky = true,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -129,7 +131,11 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </main>
-      <footer className="sticky bottom-0 flex items-center justify-between space-x-2 h-[4.56rem] mt-auto border-t border-border px-8">
+      <footer className={cn([
+        "bg-background flex items-center justify-between space-x-2 h-[4.56rem] border-t border-border px-8",
+        isFooterSticky && 'sticky bottom-0',
+        !isFooterSticky && 'mt-auto'
+      ])}>
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of{' '}
           {table.getFilteredRowModel().rows.length} iten(s) selected.

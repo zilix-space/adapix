@@ -11,7 +11,7 @@ import { Input } from '@design-system/react/components/ui/input'
 import { useActionForm } from '@/services/actions/lib/client'
 import { updateUserDataKyc } from './actions'
 import { updateUserDataKycSchema } from './schema'
-import { useApplication } from '@/app/app/_hooks/application.hook'
+import { useApplication } from '@/hooks/use-application'
 import {
   DappPage,
   DappPageFooter,

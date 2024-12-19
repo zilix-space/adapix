@@ -100,7 +100,7 @@ export function FileInput({
         )}
 
         {uploading && (
-          <span className="flex items-center justify-center gap-2 bg-white text-blue-500 border border-border rounded-full p-2 absolute top-3 right-3">
+          <span className="flex items-center justify-center gap-2 bg-background text-blue-500 border border-border rounded-full p-2 absolute top-3 right-3">
             <Loader2Icon className="w-4 h-4 animate-spin" />
           </span>
         )}

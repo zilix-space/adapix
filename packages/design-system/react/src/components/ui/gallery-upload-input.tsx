@@ -195,7 +195,7 @@ function GalleryUploadInputImage({
 
       {!item.uploading && (
         <button
-          className="absolute top-3 right-3 bg-white h-6 w-6 rounded-full flex items-center justify-center"
+          className="absolute top-3 right-3 bg-background h-6 w-6 rounded-full flex items-center justify-center"
           onClick={onRemove}
           type="button"
         >

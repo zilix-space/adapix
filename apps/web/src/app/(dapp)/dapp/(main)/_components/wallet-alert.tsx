@@ -5,7 +5,7 @@ export function WalletAlert() {
   return (
     <section>
       <main className="space-y-8">
-        <Card className="bg-white">
+        <Card className="bg-background">
           <CardHeader className="flex flex-row justify-between p-4">
             <div className="flex items-center space-x-4">
               <PercentIcon className="w-4 h-4" />

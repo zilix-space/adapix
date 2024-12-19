@@ -43,6 +43,7 @@ export class PrismaUserRepository implements IUserRepository {
       data: {
         name: data.name,
         username: data.username,
+        status: data.status,
         image: data.image,
         settings: data.settings as any,
       },

@@ -16,7 +16,7 @@ const selectTrigger = cva(
         lg: 'h-11 px-8',
       },
       variant: {
-        solid: ['bg-black/5 dark:bg-white/5 border border-border px-4 py-3'],
+        solid: ['bg-black/5 dark:bg-background/5 border border-border px-4 py-3'],
         outline: [
           'bg-transparent',
           'border',

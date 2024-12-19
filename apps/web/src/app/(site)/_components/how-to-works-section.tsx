@@ -8,7 +8,7 @@ import {
 
 export function HowToWorksSection() {
   return (
-    <section className="p-6 md:p-12 bg-white rounded-3xl border border-border">
+    <section className="p-6 md:p-12 bg-background rounded-3xl border border-border">
       <header>
         <h2 className="text-xl md:text-2xl font-semibold">Como funciona</h2>
       </header>

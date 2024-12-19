@@ -356,7 +356,7 @@
                 "type": "string",
                 "description": "O status do KYC do usuário."
               },
-              "statusReason": {
+              "re": {
                 "type": "string",
                 "description": "A razão do status do KYC do usuário."
               }

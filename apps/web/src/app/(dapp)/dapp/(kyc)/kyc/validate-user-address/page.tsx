@@ -21,7 +21,7 @@ import {
 } from '../../../_components/dapp-page'
 import { Button, ButtonIcon } from '@design-system/react/components/ui/button'
 import { updateUserAddressKyc } from './actions'
-import { useApplication } from '@/app/app/_hooks/application.hook'
+import { useApplication } from '@/hooks/use-application'
 import { useCep } from '@/hooks/use-cep'
 import { maskZipCode } from '@/helpers/masks/zip-code'
 import { useEffect } from 'react'

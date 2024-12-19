@@ -27,7 +27,7 @@ export default function WelcomeEmail({
       <Head />
       <Preview>Bem-vindo ao {APP_CONFIGS.app.name}</Preview>
       <Tailwind>
-        <Body className="mx-auto my-auto bg-white font-sans">
+        <Body className="mx-auto my-auto bg-background font-sans">
           <Container className="mx-auto my-10 max-w-[500px] rounded-md border border-solid border-gray-200 px-10 py-5">
             <Section className="mt-8 text-left">
               <Img

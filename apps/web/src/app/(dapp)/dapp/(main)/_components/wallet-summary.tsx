@@ -1,6 +1,6 @@
 'use client'
 
-import { useApplication } from '@/app/app/_hooks/application.hook'
+import { useApplication } from '@/hooks/use-application'
 import { Button } from '@design-system/react/components/ui/button'
 import { useWallet } from '../../_hooks/use-wallet'
 import { formatCurrency } from '@/helpers/format-currency'

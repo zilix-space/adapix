@@ -15,10 +15,27 @@ import { formatDate, formatDocument, formatPhone } from '../../../_utils/format'
 import { useState } from 'react'
 import type { UserSettings } from '@app/modules/src/domain/entities/User'
 import { CheckCircle, XCircle } from 'lucide-react'
-import { useAction } from '@/services/actions/lib/client'
+import { useAction, useActionForm } from '@/services/actions/lib/client'
 import { sendKYCUpdateAction } from '../../actions'
 import { toast } from '@design-system/react/components/ui/use-toast'
 import type { User } from '../../../_types'
+import {
+  FormField,
+  Form,
+  FormControl,
+  FormDescription,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@design-system/react/components/ui/form'
+import {
+  RadioGroup,
+  RadioGroupItem,
+} from '@design-system/react/components/ui/radio-group'
+import { cn } from '@design-system/react/helpers/cn'
+import { kycUpdateSchema } from '../../schemas'
+import { KYCUpdateForm } from './user-kyc-update-form'
+import { UserKycDocumentViewer } from './user-kyc-document-viewer'
 
 /**
  * Props for the KYCSheet component
@@ -32,36 +49,19 @@ interface KYCSheetProps {
  * KYCSheet component that displays user KYC information and approval/rejection actions
  */
 export function KYCSheet({ user, children }: KYCSheetProps) {
-  const [isOpen, setIsOpen] = useState(false)
-  const [rejectReason, setRejectReason] = useState('')
+  const [isOpen, setIsOpen] = useState<boolean>(false)
 
-  const { execute: sendKYCUpdate, isSubmitting } =
-    useAction(sendKYCUpdateAction)
+  const userSettings = user?.settings
+  const userKyc = userSettings?.kyc
+  const userKycStatus = userKyc?.status
 
-  const isPending =
-    user?.settings?.kyc?.status === 'pending' ||
-    user?.settings?.kyc?.status === 'submitted'
-
-  const handleSendKYCUpdate = async (status: UserSettings['kyc']['status']) => {
-    try {
-      await sendKYCUpdate({ id: user.id, status })
-      toast({
-        title: 'KYC status updated successfully',
-        description: 'The KYC status has been updated successfully',
-      })
-    } catch (error) {
-      console.error(error)
-      toast({
-        title: 'Failed to update KYC status',
-        description: 'An error occurred while updating the KYC status',
-      })
-    }
-  }
+  const isPending: boolean =
+    userKycStatus === 'pending' || userKycStatus === 'submitted'
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent className="w-full md:max-w-xl">
+      <SheetContent className="w-full md:max-w-xl overflow-y-auto h-full pb-0">
         <SheetHeader>
           <SheetTitle className="flex items-center justify-between">
             <span>KYC Information</span>
@@ -76,15 +76,13 @@ export function KYCSheet({ user, children }: KYCSheetProps) {
             </h3>
             <div>
               <p className="text-sm font-medium">Name</p>
-              <p className="text-sm">
-                {user?.settings?.kyc?.data?.name || '-'}
-              </p>
+              <p className="text-sm">{userKyc.data?.name || '-'}</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <p className="text-sm font-medium">Document</p>
                 <p className="text-sm">
-                  {user?.settings?.kyc?.data?.document
+                  {userKyc.data?.document
                     ? formatDocument(user.settings.kyc.data.document)
                     : '-'}
                 </p>
@@ -92,7 +90,7 @@ export function KYCSheet({ user, children }: KYCSheetProps) {
               <div>
                 <p className="text-sm font-medium">Birth Date</p>
                 <p className="text-sm">
-                  {user?.settings?.kyc?.data?.birthdate
+                  {userKyc.data?.birthdate
                     ? user.settings.kyc.data.birthdate
                     : '-'}
                 </p>
@@ -101,21 +99,21 @@ export function KYCSheet({ user, children }: KYCSheetProps) {
           </div>
 
           {/* Address */}
-          {user?.settings?.kyc?.data?.address && (
+          {userKyc.data?.address && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-muted-foreground">
                 Address
               </h3>
               <p className="text-sm">
                 {[
-                  user.settings.kyc.data.address.street,
-                  user.settings.kyc.data.address.number,
-                  user.settings.kyc.data.address.complement,
-                  user.settings.kyc.data.address.neighborhood,
-                  user.settings.kyc.data.address.city,
-                  user.settings.kyc.data.address.state,
-                  user.settings.kyc.data.address.country,
-                  user.settings.kyc.data.address.zipCode,
+                  userKyc.data.address.street,
+                  userKyc.data.address.number,
+                  userKyc.data.address.complement,
+                  userKyc.data.address.neighborhood,
+                  userKyc.data.address.city,
+                  userKyc.data.address.state,
+                  userKyc.data.address.country,
+                  userKyc.data.address.zipCode,
                 ]
                   .filter(Boolean)
                   .join(', ')}
@@ -156,9 +154,7 @@ export function KYCSheet({ user, children }: KYCSheetProps) {
               </div>
               <div>
                 <p className="text-sm font-medium">Wallet</p>
-                <p className="text-sm">
-                  {user?.settings?.payment?.wallet || '-'}
-                </p>
+                <p className="text-sm">{userSettings.payment?.wallet || '-'}</p>
               </div>
             </div>
           </div>
@@ -168,74 +164,14 @@ export function KYCSheet({ user, children }: KYCSheetProps) {
             <h3 className="text-sm font-medium text-muted-foreground">
               Documents
             </h3>
-            <div className="grid grid-cols-2 gap-4">
-              {user?.settings?.kyc?.data?.attachments?.documentFront && (
-                <img
-                  src={user.settings.kyc.data.attachments.documentFront}
-                  alt="Document Front"
-                  className="rounded-lg border"
-                />
-              )}
-              {user?.settings?.kyc?.data?.attachments?.documentBack && (
-                <img
-                  src={user.settings.kyc.data.attachments.documentBack}
-                  alt="Document Back"
-                  className="rounded-lg border"
-                />
-              )}
-              {user?.settings?.kyc?.data?.attachments?.selfie && (
-                <img
-                  src={user.settings.kyc.data.attachments.selfie}
-                  alt="Selfie"
-                  className="rounded-lg border"
-                />
-              )}
-              {user?.settings?.kyc?.data?.attachments?.selfieWithDocument && (
-                <img
-                  src={user.settings.kyc.data.attachments.selfieWithDocument}
-                  alt="Selfie with Document"
-                  className="rounded-lg border"
-                />
-              )}
+            <div className="space-y-4">
+              <UserKycDocumentViewer user={user} />
             </div>
           </div>
-
-          {/* Rejection Reason */}
-          {isPending && (
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium text-muted-foreground">
-                Rejection Reason
-              </h3>
-              <Textarea
-                placeholder="Enter reason for rejection..."
-                value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
-              />
-            </div>
-          )}
         </div>
 
         {/* Actions */}
-        {isPending && (
-          <SheetFooter className="mt-6">
-            <Button
-              variant="destructive"
-              onClick={() => handleSendKYCUpdate('rejected')}
-              disabled={!rejectReason || isSubmitting}
-            >
-              <XCircle className="h-4 w-4 mr-2" />
-              Reject KYC
-            </Button>
-            <Button
-              variant="default"
-              onClick={() => handleSendKYCUpdate('approved')}
-              disabled={isSubmitting}
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Approve KYC
-            </Button>
-          </SheetFooter>
-        )}
+        <KYCUpdateForm user={user} />
       </SheetContent>
     </Sheet>
   )

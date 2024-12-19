@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 
-import { useApplication } from '@/app/app/_hooks/application.hook'
+import { useApplication } from '@/hooks/use-application'
 import {
   Avatar,
   AvatarFallback,

@@ -12,6 +12,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[]
   searchField?: string
   className?: string
+  isFooterSticky?: boolean
 }
 
 /**
@@ -22,6 +23,7 @@ export function DataTable<TData, TValue>({
   data,
   searchField,
   className,
+  isFooterSticky = false,
 }: DataTableProps<TData, TValue>) {
   return (
     <DesignSystemDataTable
@@ -29,6 +31,7 @@ export function DataTable<TData, TValue>({
       columns={columns}
       data={data}
       searchField={searchField}
+      isFooterSticky={isFooterSticky}
     />
   )
 }

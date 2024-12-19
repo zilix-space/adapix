@@ -2,8 +2,8 @@
 
 import { db } from '@app/db'
 import type { User } from '../_types'
+import type { Transaction } from '../transactions/_components/columns'
 import { client } from '@/services/actions/admin-client'
-import { z } from 'zod'
 
 /**
  * Get metrics data from database
@@ -96,12 +96,14 @@ export const getLatestTransactionsAction = client.action({
             name: true,
             email: true,
             image: true,
+            role: true,
+            settings: true,
           },
         },
       },
     })
 
-    return { transactions }
+    return { transactions } as unknown as { transactions: Transaction[] }
   },
 })
 

@@ -1,9 +1,8 @@
-import { useContext } from 'react'
-
 import {
   ApplicationContext,
-  ApplicationContextProps,
-} from '../_contexts/application.context'
+  type ApplicationContextProps,
+} from '@/contexts/app.context'
+import { useContext } from 'react'
 
 export function useApplication(): ApplicationContextProps {
   return useContext(ApplicationContext)

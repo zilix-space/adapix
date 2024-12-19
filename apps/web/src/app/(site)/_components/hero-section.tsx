@@ -23,7 +23,7 @@ export async function HeroSection() {
         <div className="flex items-center space-x-4">
           <Badge
             variant="outline"
-            className="h-9 px-3 pl-2 bg-white/20 border-white/10 text-white"
+            className="h-9 px-3 pl-2 bg-background/20 border-white/10 text-white"
           >
             <span className="h-6 w-6 flex items-center justify-center rounded-full bg-black/5 mr-3">
               ₳

@@ -2,8 +2,14 @@
 
 import { db } from '@app/db'
 import type { User } from '../_types'
-import { client } from '@/services/actions/admin-client'
 import { z } from 'zod'
+import { modules } from '@app/modules/src'
+import KycError from '@/emails/kyc-error'
+import KycSuccess from '@/emails/kyc-success'
+import { APP_CONFIGS } from '@/boilerplate.config'
+import { renderAsync } from '@react-email/components'
+import { kycUpdateSchema } from './schemas'
+import { client } from '@/services/actions/admin-client'
 
 /**
  * Get all users from the database with filters
@@ -115,15 +121,15 @@ export const getUserTransactions = client.action({
       orderBy: {
         createdAt: 'desc',
       },
-      select: {
-        id: true,
-        type: true,
-        fromAmount: true,
-        toAmount: true,
-        fromCurrency: true,
-        toCurrency: true,
-        status: true,
-        createdAt: true,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
       },
     })
 
@@ -157,30 +163,58 @@ export const getUserTransactions = client.action({
 export const sendKYCUpdateAction = client.action({
   name: 'sendKYCUpdateAction',
   type: 'mutate',
-  schema: z.object({
-    id: z.string(),
-    status: z.enum(['pending', 'approved', 'rejected', 'submitted']),
-  }),
+  schema: kycUpdateSchema,
   handler: async ({ input }) => {
-    const user = await db.user.update({
-      where: {
-        id: input.id,
-      },
-      data: {
-        settings: {
-          kyc: {
-            status: input.status,
-          },
+    const { userId, status, reasons } = input
+
+    const user = await modules.usecases.user.getUserById.execute(userId)
+
+    if (!user) {
+      return {
+        status: 'error',
+        message: 'User not found',
+      }
+    }
+
+    await modules.usecases.user.updateUser.execute(userId, {
+      status: status === 'approved' ? 'ACTIVE' : 'PENDING',
+      settings: {
+        kyc: {
+          status,
+          reasons,
         },
-      },
-      select: {
-        id: true,
-        settings: true,
       },
     })
 
+    if (status === 'approved') {
+      await modules.provider.mail.send({
+        from: APP_CONFIGS.providers.mail.resend.from,
+        to: user.email,
+        subject: `Documentos validados com sucesso - ${APP_CONFIGS.app.name}`,
+        body: await renderAsync(
+          KycSuccess({ email: user.email, name: user.name }),
+        ),
+      })
+    }
+
+    if (status === 'rejected') {
+      await modules.provider.mail.send({
+        from: APP_CONFIGS.providers.mail.resend.from,
+        to: user.email,
+        subject: `Documentos inválidos - ${APP_CONFIGS.app.name}`,
+        body: await renderAsync(
+          KycError({
+            email: user.email,
+            name: user.name,
+            reasons,
+          }),
+        ),
+      })
+    }
+
     return {
-      user,
-    } as unknown as { user: User }
+      status: 'success',
+      message: 'KYC status updated successfully',
+    }
   },
 })

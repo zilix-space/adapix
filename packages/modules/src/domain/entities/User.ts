@@ -1,5 +1,22 @@
 import { Transaction } from './Transaction'
 
+export enum KYCRejectionReason {
+  INVALID_SELFIE = 'invalid_selfie',
+  INVALID_SELFIE_WITH_DOCUMENT = 'invalid_selfie_with_document',
+  INVALID_DOCUMENT_FRONT = 'invalid_document_front',
+  INVALID_DOCUMENT_BACK = 'invalid_document_back',
+  INVALID_ADDRESS = 'invalid_address',
+  INVALID_DATA = 'invalid_data',
+  SUSPICIOUS_DATA = 'suspicious_data',
+}
+
+export enum KYCStatus {
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  SUBMITTED = 'submitted',
+}
+
 export interface UserSettings {
   contact: {
     phone?: string
@@ -17,8 +34,8 @@ export interface UserSettings {
     wallet?: string
   }
   kyc: {
-    status: 'pending' | 'approved' | 'rejected' | 'submitted'
-    statusReason?: string
+    status: KYCStatus
+    reasons?: KYCRejectionReason[]
     data: {
       name?: string
       document?: string

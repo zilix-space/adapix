@@ -12,7 +12,7 @@ import {
   CollapsableFormTriggerLabel,
   CollapsableFormTriggerValue,
 } from '@/app/(dapp)/dapp/_components/dapp-collapsed-form-trigger'
-import { useApplication } from '@/app/app/_hooks/application.hook'
+import { useApplication } from '@/hooks/use-application'
 import { useActionForm } from '@/services/actions/lib/client'
 import {
   Avatar,

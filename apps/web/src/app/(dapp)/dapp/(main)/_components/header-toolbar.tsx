@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 
-import { useApplication } from '@/app/app/_hooks/application.hook'
+import { useApplication } from '@/hooks/use-application'
 import { Button } from '@design-system/react/components/ui/button'
 import { HelpCircleIcon, LogInIcon } from 'lucide-react'
 import { APP_CONFIGS } from '@/boilerplate.config'

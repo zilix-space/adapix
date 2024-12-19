@@ -14,8 +14,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@design-system/react/components/ui/dropdown-menu'
-import { LogOut, Settings, User } from 'lucide-react'
+import { LogOut, User } from 'lucide-react'
 import { signOut } from 'next-auth/react'
+import Link from 'next/link'
 
 /**
  * Props for the UserNav component
@@ -43,8 +44,10 @@ export function UserNav({ user }: UserNavProps) {
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col items-start flex-1">
-            <p className="text-sm font-medium">{user.name}</p>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
+            <p className="text-xs font-medium line-clamp-1">{user.name}</p>
+            <p className="text-xs text-muted-foreground line-clamp-1">
+              {user.email}
+            </p>
           </div>
         </button>
       </DropdownMenuTrigger>
@@ -52,14 +55,12 @@ export function UserNav({ user }: UserNavProps) {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>Profile</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
-          </DropdownMenuItem>
+          <Link href="/dapp/settings/my-account">
+            <DropdownMenuItem>
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuItem>
+          </Link>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>

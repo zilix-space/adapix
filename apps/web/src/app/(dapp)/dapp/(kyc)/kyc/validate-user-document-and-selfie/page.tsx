@@ -9,7 +9,7 @@ import { useActionForm } from '@/services/actions/lib/client'
 import { FileInput } from '@design-system/react/components/ui/file-input'
 import { updateUserDocumentWithSelfieKyc } from './actions'
 import { updateUserDocumentWithSelfieKycSchema } from './schema'
-import { useApplication } from '@/app/app/_hooks/application.hook'
+import { useApplication } from '@/hooks/use-application'
 import {
   DappPage,
   DappPageFooter,

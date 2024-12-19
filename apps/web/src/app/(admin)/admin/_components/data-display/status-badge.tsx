@@ -1,16 +1,15 @@
 import { Badge } from '@design-system/react/components/ui/badge'
-import { cn } from '@design-system/react/helpers/cn'
-import { cva, type VariantProps } from 'class-variance-authority'
+import { KYCStatus } from '@app/modules/src/domain/entities/User'
 
 /**
- * Type for role variants
+ * Type for role variants based on User entity
  */
 type RoleVariant = 'USER' | 'ADMIN'
 
 /**
- * Type for KYC variants
+ * Type for KYC variants based on User entity KYCStatus enum
  */
-type KYCVariant = 'pending' | 'approved' | 'rejected' | 'submitted'
+type KYCVariant = `${KYCStatus}`
 
 /**
  * Type for transaction variants
@@ -23,51 +22,9 @@ type TransactionVariant =
   | 'expired'
 
 /**
- * Status badge variants using cva
- */
-const statusBadgeVariants = cva('font-medium', {
-  variants: {
-    type: {
-      role: '',
-      kyc: '',
-      transaction: '',
-    },
-    variant: {
-      // Role variants
-      USER: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-      ADMIN:
-        'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-
-      // KYC variants
-      pending:
-        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-      approved:
-        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      rejected: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-      submitted:
-        'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-
-      // Transaction variants
-      pending_deposit:
-        'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-      pending_exchange:
-        'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-      pending_payment:
-        'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-      completed:
-        'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-      expired: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-    },
-  },
-  defaultVariants: {
-    type: 'role',
-  },
-})
-
-/**
  * Props for the StatusBadge component
  */
-interface StatusBadgeProps extends VariantProps<typeof statusBadgeVariants> {
+interface StatusBadgeProps {
   variant: RoleVariant | KYCVariant | TransactionVariant
   type?: 'role' | 'kyc' | 'transaction'
   className?: string
@@ -99,15 +56,43 @@ const variantLabels: Record<
 }
 
 /**
+ * Variant mapping for badge styles
+ */
+const variantMapping: Record<
+  RoleVariant | KYCVariant | TransactionVariant,
+  | 'default'
+  | 'secondary'
+  | 'destructive'
+  | 'outline'
+  | 'success'
+  | 'warning'
+  | 'info'
+  | 'purple'
+> = {
+  // Role variants
+  USER: 'outline',
+  ADMIN: 'purple',
+
+  // KYC variants
+  pending: 'warning',
+  approved: 'success',
+  rejected: 'destructive',
+  submitted: 'info',
+
+  // Transaction variants
+  pending_deposit: 'warning',
+  pending_exchange: 'info',
+  pending_payment: 'purple',
+  completed: 'success',
+  expired: 'destructive',
+}
+
+/**
  * StatusBadge component for displaying user roles, KYC status and transaction status with appropriate styling
  */
-export function StatusBadge({
-  variant,
-  type = 'role',
-  className,
-}: StatusBadgeProps) {
+export function StatusBadge({ variant, className }: StatusBadgeProps) {
   return (
-    <Badge className={cn(statusBadgeVariants({ variant, type }), className)}>
+    <Badge variant={variantMapping[variant]} className={className}>
       {variantLabels[variant]}
     </Badge>
   )

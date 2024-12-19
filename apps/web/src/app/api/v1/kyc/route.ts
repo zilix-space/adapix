@@ -7,6 +7,10 @@ import { modules } from '@app/modules/src'
 import { renderAsync } from '@react-email/components'
 import { z } from 'zod'
 import { db } from '@app/db'
+import {
+  KYCRejectionReason,
+  KYCStatus,
+} from '@app/modules/src/domain/entities/User'
 
 export const revalidate = 0
 
@@ -14,11 +18,22 @@ export const PUT = createApiHandler({
   schemas: {
     body: z.object({
       userId: z.string(),
-      status: z.enum(['approved', 'rejected']),
+      status: z.nativeEnum(KYCStatus),
+      reasons: z.array(z.nativeEnum(KYCRejectionReason)).optional(),
+    }),
+    query: z.object({
+      token: z.string(),
     }),
   },
-  handler: async (_, { body }) => {
-    const { userId, status } = body
+  handler: async (_, { body, query }) => {
+    const { userId, status, reasons } = body
+    const { token } = query
+
+    if (token !== process.env.ADMIN_TOKEN) {
+      return sendResponse(401, {
+        message: 'Unauthorized',
+      })
+    }
 
     const user = await modules.usecases.user.getUserById.execute(userId)
 
@@ -33,7 +48,7 @@ export const PUT = createApiHandler({
       settings: {
         kyc: {
           status,
-          statusReason: 'invalid_data',
+          reasons,
         },
       },
     })
@@ -55,7 +70,7 @@ export const PUT = createApiHandler({
         to: user.email,
         subject: `Documentos inválidos - ${APP_CONFIGS.app.name}`,
         body: await renderAsync(
-          KycError({ email: user.email, name: user.name }),
+          KycError({ email: user.email, name: user.name, reasons }),
         ),
       })
     }
@@ -83,7 +98,7 @@ export const GET = createApiHandler({
       email: user.email,
       kyc: {
         status: user.settings.kyc.status,
-        statusReason: user.settings.kyc.statusReason,
+        reasons: user.settings.kyc.reasons,
         data: user.settings.kyc.data,
       },
     }))

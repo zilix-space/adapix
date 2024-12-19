@@ -59,12 +59,16 @@ export default async function UserDetailsPage({
         <div className="px-6 space-y-6">
           <UserStats {...stats} />
 
-          <Card>
+          <Card className="!pb-0">
             <CardHeader>
               <CardTitle>Transactions</CardTitle>
             </CardHeader>
-            <CardContent className="!px-0 !pb-0">
-              <DataTable columns={columns} data={transactions as any[]} />
+            <CardContent className="!px-0 !pb-0 relative">
+              <DataTable
+                columns={columns}
+                data={transactions as any[]}
+                isFooterSticky={false}
+              />
             </CardContent>
           </Card>
         </div>

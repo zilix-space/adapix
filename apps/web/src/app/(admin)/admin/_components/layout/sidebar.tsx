@@ -116,9 +116,10 @@ const navigationItems = [
     href: '/admin/users',
     icon: Users,
     items: [
-      { title: 'Pending', value: 'PENDING' },
-      { title: 'Approved', value: 'APPROVED' },
-      { title: 'Rejected', value: 'REJECTED' },
+      { title: 'Pending', value: 'pending' },
+      { title: 'Approved', value: 'approved' },
+      { title: 'Rejected', value: 'rejected' },
+      { title: 'Submitted', value: 'submitted' },
     ],
     paramName: 'status',
   },
@@ -155,7 +156,7 @@ export function AdminSidebar({ user }: SidebarProps): JSX.Element {
   const pathname = usePathname()
 
   return (
-    <div className="flex flex-col justify-between h-screen border-r">
+    <div className="flex flex-col justify-between h-screen border-r max-w-[20rem]">
       <header className="flex justify-between items-center border-b h-[4.3rem] px-4">
         <Logo className="h-7" />
         <Button size="icon" variant="outline">
@@ -201,7 +202,7 @@ export function AdminSidebar({ user }: SidebarProps): JSX.Element {
           <ExternalLink className="h-4 w-4" />
           Go to AdaPix
         </Link>
-        <div className="p-4 pt-1 border-t">
+        <div className="p-4 border-t">
           <UserNav user={user} />
         </div>
       </footer>

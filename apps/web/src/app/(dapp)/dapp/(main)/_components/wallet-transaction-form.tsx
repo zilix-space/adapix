@@ -24,7 +24,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowDownIcon, ArrowRightIcon, ArrowUpIcon } from 'lucide-react'
 import { cn } from '@design-system/react/helpers/cn'
 import { useWallet } from '../../_hooks/use-wallet'
-import { useApplication } from '@/app/app/_hooks/application.hook'
+import { useApplication } from '@/hooks/use-application'
 
 export default function WalletTransactionForm() {
   const [transactionType, setTransactionType] = useState<'sell' | 'buy'>('buy')

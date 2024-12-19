@@ -7,13 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest"
+    "test": "vitest",
+    "seed:users": "tsx scripts/seed-users.ts",
+    "seed:transactions": "tsx scripts/seed-transactions.ts"
   },
   "dependencies": {
     "@app/db": "*",
     "@app/modules": "*",
     "@auth/prisma-adapter": "^1.0.5",
     "@design-system/react": "*",
+    "@faker-js/faker": "^9.3.0",
     "@hookform/resolvers": "^3.3.2",
     "@meshsdk/core": "^1.5.25",
     "@meshsdk/react": "^1.1.12",
