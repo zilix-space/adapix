@@ -24,11 +24,6 @@ import { maskCpf } from '@/helpers/masks/cpf'
 import { maskDate } from '@/helpers/masks/date'
 import { ArrowRightIcon } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
-export const fetchCache = 'force-no-store'
-export const revalidate = 0
-export const dynamicParams = true
-
 export default function Page() {
   const application = useApplication()
 

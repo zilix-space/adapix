@@ -3,11 +3,6 @@
 import { PropsWithChildren, useEffect, useState } from 'react'
 import { Card, CardContent } from '@design-system/react/components/ui/card'
 
-export const dynamic = 'force-dynamic'
-export const fetchCache = 'force-no-store'
-export const revalidate = 0
-export const dynamicParams = true
-
 export default function Layout({ children }: PropsWithChildren) {
   const [isInIframe, setIsInIframe] = useState(false)
 
