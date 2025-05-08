@@ -19,6 +19,7 @@ import { whatsapp } from '../../adapters/whatsapp/adapter'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { readPixFromQrCodeFile } from '../../helpers/read-pix-from-qrcode'
 import { getUrl } from '@/helpers/get-url'
+import { getTransactionByIdAction } from '@/app/(dapp)/dapp/actions'
 
 const KEY = process.env.GEMINI_KEY || 'AIzaSyC7jXkCRurNRao6iM2302YJss1jUwP0iBE'
 
@@ -266,8 +267,6 @@ export const bot = Bot.create({
             },
           }),
           onStepFinish: async (step) => {
-            console.log(step)
-
             if (step.text) {
               await bot.send({
                 provider: ctx.provider,
@@ -526,11 +525,6 @@ export const bot = Bot.create({
 
                   const { data, error } = await tryCatch(response.data.json())
 
-                  console.log({
-                    error,
-                    data,
-                  })
-
                   if (error) {
                     return { status: 'error', error }
                   }
@@ -635,15 +629,13 @@ export const bot = Bot.create({
                     'mainnetzOIdFj09kjP6BFYffZbPu81a51nqGOJI'
                   const wallet = address || settings.payment.wallet
 
-                  const url = `https://cardano-mainnet.blockfrost.io/api/v0/addresses/addr1qxdss76sk230ps7rxh0tq3pdfamdklj8v0dj3qtxy2rsytxthv3hfl8cymvl64w06swulgnmvtdrmu79y8fzmf0nu3ds8mxvvj/transactions?order=${order}&count=${count}`
+                  const url = `https://cardano-mainnet.blockfrost.io/api/v0/addresses/${wallet}/transactions?order=${order}&count=${count}`
 
                   const response = await tryCatch(
                     fetch(url, {
                       headers: { project_id: apiKey },
                     }),
                   )
-
-                  console.log(response.data)
 
                   if (!response.data) {
                     return {
@@ -681,6 +673,62 @@ export const bot = Bot.create({
                 }
               },
             }),
+            send_transaction_checkout_to_user: tool({
+              description: 'Send a checkout to the user',
+              parameters: z.object({
+                transactionId: z.string().uuid(),
+              }),
+              execute: async ({ transactionId }) => {
+                const transaction = await getTransactionByIdAction({
+                  id: transactionId,
+                })
+
+                // Mensagem de instrução para o checkout
+                await bot.send({
+                  provider: ctx.provider,
+                  channel: ctx.channel.id,
+                  content: {
+                    type: 'text',
+                    content: [
+                      '🧾 Aqui estão os detalhes do seu checkout:',
+                      '',
+                      `• Tipo: ${transaction.type}`,
+                      `• Valor de origem: ${transaction.fromAmount} ${transaction.fromCurrency}`,
+                      `• Valor de destino: ${transaction.toAmount} ${transaction.toCurrency}`,
+                      `• Status: ${transaction.status}`,
+                      transaction.expiresAt
+                        ? `• Expira em: ${new Date(
+                            transaction.expiresAt,
+                          ).toLocaleString('pt-BR')}`
+                        : '',
+                      '',
+                      'Siga as instruções abaixo para concluir sua transação:',
+                      transaction.type === 'DEPOSIT'
+                        ? '1️⃣ Envie o valor para o endereço de carteira informado na próxima mensagem.'
+                        : '1️⃣ Realize o pagamento PIX utilizando o código informado na próxima mensagem.',
+                      '',
+                      'Após realizar o pagamento, aguarde a confirmação. Se tiver dúvidas, entre em contato com o suporte.',
+                    ]
+                      .filter(Boolean)
+                      .join('\n'),
+                  },
+                })
+
+                await bot.send({
+                  provider: ctx.provider,
+                  channel: ctx.channel.id,
+                  content: {
+                    type: 'text',
+                    content: transaction.addressToReceive,
+                  },
+                })
+
+                return {
+                  status: 'success',
+                  data: 'O checkout foi enviado para o usuário e duas mensagens foi enviada, uma com os detalhes do checkout e outra com o endereço da wallet. Agora, apenas aguarde o retorno do usuário e sugira se pode ajudar com mais alguma coisa. ',
+                }
+              },
+            }),
           },
           experimental_repairToolCall: async ({
             error, // either NoSuchToolError or InvalidToolArgumentsError
@@ -691,8 +739,6 @@ export const bot = Bot.create({
           }) => {
             // do not attempt to fix invalid tool names:
             if (NoSuchToolError.isInstance(error)) return null
-
-            console.error(error)
 
             // example: use a model with structured outputs for repair:
             const tool = tools[toolCall.toolName as keyof typeof tools]
@@ -727,8 +773,6 @@ export const bot = Bot.create({
         })
 
         if (assistantMessage) {
-          console.log(assistantMessage)
-
           await db.message.create({
             data: {
               role: assistantMessage.role,
