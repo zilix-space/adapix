@@ -1,13 +1,6 @@
 import { Bot } from '../../bot-manager'
 import { telegram } from '../../adapters/telegram.adapter'
-import {
-  appendResponseMessages,
-  generateObject,
-  generateText,
-  NoSuchToolError,
-  tool,
-  type Message,
-} from 'ai'
+import { appendResponseMessages, generateText, tool, type Message } from 'ai'
 import { db } from '@app/db'
 import { UserSettings } from '@app/modules/src/domain/entities/User'
 import { getAdapixPrompt } from './adapix.prompt'
@@ -17,13 +10,58 @@ import { tryCatch } from '@/helpers/try-catch'
 import { randomUUID } from 'node:crypto'
 import { whatsapp } from '../../adapters/whatsapp/adapter'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { createGroq } from '@ai-sdk/groq'
+import { createXai } from '@ai-sdk/xai'
 import { readPixFromQrCodeFile } from '../../helpers/read-pix-from-qrcode'
 import { getUrl } from '@/helpers/get-url'
 
-const KEY = process.env.GEMINI_KEY || 'AIzaSyC7jXkCRurNRao6iM2302YJss1jUwP0iBE'
+function getModel(options?: {
+  provider?: string
+  modelId?: string
+  token?: string
+}) {
+  const PROVIDER = process.env.GEMINI_PROVIDER || options?.provider
+  const MODEL = process.env.GEMINI_MODEL || options?.modelId
+  const KEY = process.env.GEMINI_KEY || options.token
 
-const google = createGoogleGenerativeAI({ apiKey: KEY })
-const model = google('gemini-2.0-flash')
+  if (!KEY) {
+    throw new Error('API key not found')
+  }
+
+  if (!MODEL) {
+    throw new Error('Model not found')
+  }
+
+  if (!PROVIDER) {
+    throw new Error('Provider not found')
+  }
+
+  switch (PROVIDER) {
+    case 'google': {
+      const service = createGoogleGenerativeAI({ apiKey: KEY })
+      const model = service(MODEL, {
+        structuredOutputs: true,
+      })
+
+      return model
+    }
+    case 'xai': {
+      const service = createXai({ apiKey: KEY })
+      const model = service(MODEL)
+
+      return model
+    }
+    case 'groq': {
+      const service = createGroq({ apiKey: KEY })
+      const model = service(MODEL)
+
+      return model
+    }
+
+    default:
+      throw new Error(`Provider ${PROVIDER} not supported`)
+  }
+}
 
 export const bot = Bot.create({
   id: 'bot-id',
@@ -63,6 +101,12 @@ export const bot = Bot.create({
       try {
         if (!ctx.message.content) return
         if (ctx.message.content.type === 'command') return
+
+        const model = getModel({
+          provider: 'google',
+          token: 'AIzaSyC7jXkCRurNRao6iM2302YJss1jUwP0iBE',
+          modelId: 'gemini-2.5-flash-preview-04-17',
+        })
 
         const user = await db.user.findFirst({
           where: {
@@ -163,6 +207,13 @@ export const bot = Bot.create({
         const history = await db.message.findMany({
           where: {
             userId: user.id,
+            createdAt: {
+              // last 24 hours
+              gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
           },
         })
 
@@ -237,7 +288,7 @@ export const bot = Bot.create({
           },
         })
 
-        const { response } = await generateText({
+        const { response, finishReason } = await generateText({
           model,
           messages,
           toolChoice: 'auto',
@@ -306,10 +357,16 @@ export const bot = Bot.create({
                 }
               },
             }),
-            list_deposits: tool({
+            list_transactions: tool({
               description:
-                'List the user deposit transactions (DEPOSIT), optionally filtered by status. Use to show deposit history.',
+                'Lista o histórico de transações do usuário (compras ou vendas de ADA), opcionalmente filtrados por tipo e status. Os resultados são ordenados do mais recente para o mais antigo.',
               parameters: z.object({
+                type: z
+                  .enum(['DEPOSIT', 'WITHDRAW'])
+                  .optional()
+                  .describe(
+                    'Tipo da transação: "DEPOSIT" para compras/depósitos, "WITHDRAW" para vendas/saques. Se omitido, mostra todos os tipos.',
+                  ),
                 status: z
                   .enum([
                     'PENDING_DEPOSIT',
@@ -318,15 +375,18 @@ export const bot = Bot.create({
                     'COMPLETED',
                     'EXPIRED',
                   ])
-                  .optional(),
+                  .optional()
+                  .describe(
+                    'Status da transação para filtrar os resultados. Se omitido, mostra todas as transações.',
+                  ),
               }),
-              execute: async ({ status }) => {
+              execute: async ({ type, status }) => {
                 try {
-                  const deposits = await tryCatch(
+                  const transactions = await tryCatch(
                     db.transaction.findMany({
                       where: {
                         userId: user.id,
-                        type: 'DEPOSIT',
+                        ...(type ? { type } : {}),
                         ...(status ? { status } : {}),
                       },
                       orderBy: {
@@ -335,106 +395,50 @@ export const bot = Bot.create({
                       take: 20,
                     }),
                   )
-                  return deposits
+                  return transactions
                 } catch (error: any) {
                   return {
                     status: 'error',
-                    error: error?.message || 'Erro ao listar depósitos.',
+                    error: error?.message || 'Erro ao listar transações.',
                   }
                 }
               },
             }),
-            list_withdrawals: tool({
+            create_transaction: tool({
               description:
-                'List the user withdrawal transactions (WITHDRAW), optionally filtered by status. Use to show withdrawal history.',
+                'Cria uma nova transação (compra/depósito ou venda/saque) e envia informações de checkout. Esta ferramenta automaticamente envia a chave PIX ou endereço da carteira para pagamento em uma mensagem separada.',
               parameters: z.object({
-                status: z
-                  .enum([
-                    'PENDING_DEPOSIT',
-                    'PENDING_EXCHANGE',
-                    'PENDING_PAYMENT',
-                    'COMPLETED',
-                    'EXPIRED',
-                  ])
-                  .optional(),
-              }),
-              execute: async ({ status }) => {
-                try {
-                  const withdrawals = await tryCatch(
-                    db.transaction.findMany({
-                      where: {
-                        userId: user.id,
-                        type: 'WITHDRAW',
-                        ...(status ? { status } : {}),
-                      },
-                      orderBy: {
-                        createdAt: 'desc',
-                      },
-                      take: 20,
-                    }),
-                  )
-                  return withdrawals
-                } catch (error: any) {
-                  return {
-                    status: 'error',
-                    error: error?.message || 'Erro ao listar saques.',
-                  }
-                }
-              },
-            }),
-            crate_estimate: tool({
-              description:
-                'Generate an estimate for buying or selling ADA. Use to show the user the current quote, fees, and validity.',
-              parameters: z.object({
-                type: z.enum(['DEPOSIT', 'WITHDRAW']),
-                in: z.enum(['ada', 'brl']),
-                amount: z.number(),
-              }),
-              execute: async ({ type, amount }) => {
-                try {
-                  const types = {
-                    DEPOSIT: 'buy',
-                    WITHDRAW: 'sell',
-                  } as const
-
-                  const estimate = await tryCatch(
-                    modules.usecases.transaction.estimateTransaction.execute({
-                      type: types[type],
-                      amount,
-                    }),
-                  )
-
-                  return estimate
-                } catch (error: any) {
-                  return {
-                    status: 'error',
-                    error: error?.message || 'Erro ao gerar estimativa.',
-                  }
-                }
-              },
-            }),
-            create_buy_transaction: tool({
-              description:
-                'Create a new buy transaction (deposit) and sends checkout info. Amount should be in BRL.',
-              parameters: z.object({
-                amount: z.number().describe('Amount in BRL to deposit'),
+                type: z
+                  .enum(['buy', 'sell'])
+                  .describe(
+                    '"buy" para compra de ADA, "sell" para venda de ADA',
+                  ),
+                amount: z
+                  .number()
+                  .describe('Valor em BRL (para compra) ou ADA (para venda)'),
                 address: z
                   .string()
                   .optional()
                   .describe(
-                    "Cardano wallet address to receive ADA. If not provided, uses user's registered wallet.",
+                    'Para compras: Endereço da carteira Cardano para receber ADA. Para vendas: Chave PIX para receber BRL. Se não fornecido, usa o dado registrado do usuário.',
                   ),
               }),
-              execute: async ({ amount, address }) => {
+              execute: async ({ type, amount, address }) => {
                 try {
                   const transaction = await tryCatch(
                     modules.usecases.transaction.createTransaction.execute({
                       userId: user.id,
-                      type: 'buy',
+                      type,
                       amount,
-                      address: address || settings.payment.wallet,
+                      address:
+                        address ||
+                        (type === 'buy'
+                          ? settings.payment.wallet
+                          : settings.payment.pix),
                     }),
                   )
+
+                  const isBuy = type === 'buy'
 
                   // Send checkout info
                   await bot.send({
@@ -443,10 +447,15 @@ export const bot = Bot.create({
                     content: {
                       type: 'text',
                       content: [
-                        '🧾 Aqui estão os detalhes do seu checkout:',
+                        `🧾 Aqui estão os detalhes para sua ${
+                          isBuy ? 'compra' : 'venda'
+                        }:`,
                         '',
-                        `• Tipo: Compra de ADA`,
-                        `• Valor a pagar: ${transaction.data.fromAmount} ${transaction.data.fromCurrency}`,
+                        '',
+                        `• Tipo: ${isBuy ? 'Compra' : 'Venda'} de ADA`,
+                        `• ${isBuy ? 'Valor a pagar' : 'Valor a enviar'}: ${
+                          transaction.data.fromAmount
+                        } ${transaction.data.fromCurrency}`,
                         `• Você receberá: ${transaction.data.toAmount} ${transaction.data.toCurrency}`,
                         `• Status: ${transaction.data.status}`,
                         transaction.data.expiresAt
@@ -455,8 +464,11 @@ export const bot = Bot.create({
                             ).toLocaleString('pt-BR')}`
                           : '',
                         '',
-                        'Siga as instruções abaixo para concluir sua compra:',
-                        '1️⃣ Realize o pagamento PIX utilizando o código informado na próxima mensagem.',
+                        'Siga as instruções abaixo para concluir sua transação:',
+                        isBuy
+                          ? '1️⃣ Realize o pagamento PIX utilizando o código informado na próxima mensagem.'
+                          : '1️⃣ Envie o valor em ADA para o endereço Cardano informado na próxima mensagem.',
+                        '',
                         '',
                         'Após realizar o pagamento, aguarde a confirmação. Se tiver dúvidas, entre em contato com o suporte.',
                       ]
@@ -471,134 +483,107 @@ export const bot = Bot.create({
                     channel: ctx.channel.id,
                     content: {
                       type: 'text',
-                      content: transaction.data.addressToReceive,
+                      content: isBuy
+                        ? transaction.data.paymentAddress
+                        : transaction.data.type === 'DEPOSIT'
+                        ? transaction.data.paymentAddress
+                        : transaction.data.exchangeAddress,
                     },
                   })
-
-                  return transaction
-                } catch (error: any) {
-                  return {
-                    status: 'error',
-                    error:
-                      error?.message || 'Erro ao criar transação de compra.',
-                  }
-                }
-              },
-            }),
-            create_sell_transaction: tool({
-              description:
-                'Create a new sell transaction (withdrawal) and sends checkout info. Amount should be in ADA.',
-              parameters: z.object({
-                amount: z.number().describe('Amount in ADA to sell'),
-                address: z
-                  .string()
-                  .optional()
-                  .describe(
-                    "PIX key to receive BRL. If not provided, uses user's registered PIX key.",
-                  ),
-              }),
-              execute: async ({ amount, address }) => {
-                try {
-                  const transaction = await tryCatch(
-                    modules.usecases.transaction.createTransaction.execute({
-                      userId: user.id,
-                      type: 'sell',
-                      amount,
-                      address: address || settings.payment.pix,
-                    }),
-                  )
-
-                  // Send checkout info
-                  await bot.send({
-                    provider: ctx.provider,
-                    channel: ctx.channel.id,
-                    content: {
-                      type: 'text',
-                      content: [
-                        '🧾 Aqui estão os detalhes do seu checkout:',
-                        '',
-                        `• Tipo: Venda de ADA`,
-                        `• Valor a enviar: ${transaction.data.fromAmount} ${transaction.data.fromCurrency}`,
-                        `• Você receberá: ${transaction.data.toAmount} ${transaction.data.toCurrency}`,
-                        `• Status: ${transaction.data.status}`,
-                        transaction.data.expiresAt
-                          ? `• Expira em: ${new Date(
-                              transaction.data.expiresAt,
-                            ).toLocaleString('pt-BR')}`
-                          : '',
-                        '',
-                        'Siga as instruções abaixo para concluir sua venda:',
-                        '1️⃣ Envie o valor em ADA para o endereço Cardano informado na próxima mensagem.',
-                        '',
-                        'Após realizar o envio, aguarde a confirmação. Se tiver dúvidas, entre em contato com o suporte.',
-                      ]
-                        .filter(Boolean)
-                        .join('\n'),
-                    },
-                  })
-
-                  // Send wallet address separately
-                  await bot.send({
-                    provider: ctx.provider,
-                    channel: ctx.channel.id,
-                    content: {
-                      type: 'text',
-                      content: transaction.data.addressToReceive,
-                    },
-                  })
-
-                  return transaction
-                } catch (error: any) {
-                  return {
-                    status: 'error',
-                    error:
-                      error?.message || 'Erro ao criar transação de venda.',
-                  }
-                }
-              },
-            }),
-            get_pix_from_qr_code_image: tool({
-              description:
-                'Extract PIX information from a QR Code image sent by the user. Use only for images.',
-              parameters: z.object({
-                url: z.string().optional(),
-              }),
-              execute: async () => {
-                try {
-                  if (ctx.message.content.type !== 'image') {
-                    return {
-                      status: 'error',
-                      error: 'No image content found.',
-                    }
-                  }
-                  const file = ctx.message.content.file
-                  const code = await readPixFromQrCodeFile(file)
-                  if (!code) {
-                    return {
-                      status: 'error',
-                      error: 'QR Code não encontrado ou inválido.',
-                    }
-                  }
 
                   return {
                     status: 'success',
                     data: {
-                      code,
+                      message:
+                        'Transaction created successfully and all messages already sent to user with payment data. Only answer if you can help with something.',
                     },
                   }
                 } catch (error: any) {
                   return {
                     status: 'error',
-                    error: error?.message || 'Erro ao extrair QR Code.',
+                    error:
+                      error?.message ||
+                      `Erro ao criar transação de ${
+                        type === 'buy' ? 'compra' : 'venda'
+                      }.`,
                   }
                 }
               },
             }),
+            get_estimate_transaction: tool({
+              description:
+                'Gera uma estimativa para compra ou venda de ADA, mostrando o valor aproximado, taxas e validade da cotação. Use esta ferramenta antes de criar qualquer transação.',
+              parameters: z.object({
+                type: z
+                  .enum(['buy', 'sell'])
+                  .describe(
+                    'Tipo da transação: "buy" para compra, "sell" para venda',
+                  ),
+                amount: z.number(),
+              }),
+              execute: async ({ type, amount }) => {
+                try {
+                  const estimate = await tryCatch(
+                    modules.usecases.transaction.estimateTransaction.execute({
+                      type: type as 'buy' | 'sell',
+                      amount,
+                    }),
+                  )
+
+                  return estimate
+                } catch (error: any) {
+                  return {
+                    status: 'error',
+                    error: error?.message || 'Erro ao gerar estimativa.',
+                  }
+                }
+              },
+            }),
+            // get_address_from_qr_code: tool({
+            //   description:
+            //     'Extrai informações PIX de uma imagem de QR Code enviada pelo usuário. Esta ferramenta tentará ler o código PIX e retornar os dados contidos nele.',
+            //   parameters: z.object({
+            //     url: z.string().optional().describe(''),
+            //   }),
+            //   execute: async () => {
+            //     try {
+            //       if (ctx.message.content.type !== 'image') {
+            //         return {
+            //           status: 'error',
+            //           error: 'No image content found.',
+            //         }
+            //       }
+            //       const file = ctx.message.content.file
+            //       const code = await readPixFromQrCodeFile(file)
+            //       if (!code) {
+            //         return {
+            //           status: 'error',
+            //           error: 'QR Code não encontrado ou inválido.',
+            //         }
+            //       }
+
+            //       return {
+            //         status: 'success',
+            //         data: {
+            //           code,
+            //         },
+            //       }
+            //     } catch (error: any) {
+            //       return {
+            //         status: 'error',
+            //         error: error?.message || 'Erro ao extrair QR Code.',
+            //       }
+            //     }
+            //   },
+            // }),
             get_latest_news: tool({
               description:
-                'Fetch the latest news from the Cardano ecosystem. Use to keep the user informed about Cardano updates.',
+                'Busca as últimas notícias do ecossistema Cardano. Use para manter o usuário informado sobre atualizações, eventos e desenvolvimentos da rede Cardano.',
               parameters: z.object({
-                count: z.number().optional(),
+                count: z
+                  .number()
+                  .optional()
+                  .describe('Número de notícias a retornar. Padrão é 5.'),
               }),
               execute: async () => {
                 try {
@@ -644,60 +629,176 @@ export const bot = Bot.create({
                 }
               },
             }),
-            get_user_wallet_info: tool({
+            get_wallet: tool({
               description:
-                'Fetch Cardano wallet information (balance, address details) for a given address or the user profile wallet.',
+                'Busca informações da carteira Cardano incluindo saldo, detalhes do endereço e histórico de transações. Fornece uma visão completa do status da carteira.',
               parameters: z.object({
                 address: z
                   .string()
                   .optional()
-                  .describe('Default is user account wallet'),
+                  .describe(
+                    'Endereço da carteira Cardano. Se não fornecido, usa a carteira registrada do usuário.',
+                  ),
+                count: z
+                  .number()
+                  .default(10)
+                  .optional()
+                  .describe(
+                    'Número de transações a retornar no histórico. Padrão é 10.',
+                  ),
               }),
-              execute: async ({ address }) => {
+              execute: async ({ address, count = 10 }) => {
                 try {
                   const apiKey =
                     process.env.BLOCKFROST_API_KEY ||
                     'mainnetzOIdFj09kjP6BFYffZbPu81a51nqGOJI'
-                  const wallet = address || settings.payment.wallet
+                  const walletAddress = address || settings.payment.wallet
+
+                  if (!walletAddress) {
+                    return {
+                      status: 'error',
+                      error:
+                        'Nenhum endereço de carteira fornecido ou cadastrado.',
+                    }
+                  }
 
                   console.log({
-                    walleto: wallet,
+                    wallet: walletAddress,
                   })
 
-                  const url = `https://cardano-mainnet.blockfrost.io/api/v0/addresses/${wallet}`
+                  let walletDataFromApi: any = {
+                    address: walletAddress,
+                    amount: [],
+                    stake_address: null,
+                    type: 'shelley',
+                    script: false,
+                  }
+                  let transactionsData: any[] = []
+                  let walletInfoError: string | null = null
+                  let txHistoryError: string | null = null
+                  let userFriendlyMessage: string | null = null
 
-                  const response = await tryCatch(
-                    fetch(url, {
+                  const walletInfoUrl = `https://cardano-mainnet.blockfrost.io/api/v0/addresses/${walletAddress}`
+                  const walletInfoResponse = await tryCatch(
+                    fetch(walletInfoUrl, {
                       headers: { project_id: apiKey },
+                      cache: 'no-store',
+                      next: {
+                        revalidate: 0,
+                      },
                     }),
                   )
 
-                  if (!response.data) {
+                  if (!walletInfoResponse.data) {
                     return {
                       status: 'error',
-                      error: 'Request error',
+                      error: 'Request error when fetching wallet info',
                     }
                   }
 
-                  if (!response.data.ok) {
+                  if (!walletInfoResponse.data.ok) {
                     return {
                       status: 'error',
-                      error: await response.data.text(),
+                      error: await walletInfoResponse.data.text(),
                     }
                   }
 
-                  const { data, error } = await tryCatch(response.data.json())
-
-                  if (error || !data) {
+                  if (walletInfoResponse.data && walletInfoResponse.data.ok) {
+                    const { data, error } = await tryCatch(
+                      walletInfoResponse.data.json(),
+                    )
+                    if (data && !error) {
+                      walletDataFromApi = data
+                    } else {
+                      walletInfoError =
+                        error?.message || 'Erro ao processar dados da carteira.'
+                    }
+                  } else if (
+                    walletInfoResponse.data &&
+                    walletInfoResponse.data.status === 404
+                  ) {
+                    userFriendlyMessage =
+                      'Esta carteira é nova ou ainda não possui transações. O saldo é 0 ADA.'
+                    return {
+                      status: 'success',
+                      data: {
+                        wallet: walletDataFromApi,
+                        transactions: [],
+                        message: userFriendlyMessage,
+                      },
+                    }
+                  } else {
+                    walletInfoError =
+                      walletInfoResponse.error?.message ||
+                      (walletInfoResponse.data
+                        ? await walletInfoResponse.data.text()
+                        : 'Erro ao buscar informações da carteira.')
                     return {
                       status: 'error',
-                      error: error || 'Could not fetch wallet info',
+                      error: walletInfoError,
                     }
                   }
 
+                  // Fetch transaction history
+                  const txUrl = `https://cardano-mainnet.blockfrost.io/api/v0/addresses/${walletAddress}/transactions?order=desc&count=${count}`
+                  const txResponse = await tryCatch(
+                    fetch(txUrl, {
+                      headers: { project_id: apiKey },
+                      cache: 'no-store',
+                      next: {
+                        revalidate: 0,
+                      },
+                    }),
+                  )
+
+                  if (!txResponse.data) {
+                    return {
+                      status: 'success',
+                      data: {
+                        wallet: walletDataFromApi,
+                        transactions: [],
+                        error_transactions:
+                          'Request error when fetching transactions',
+                      },
+                    }
+                  }
+
+                  if (txResponse.data && txResponse.data.ok) {
+                    const { data: txData, error: txJsonError } = await tryCatch(
+                      txResponse.data.json(),
+                    )
+                    if (txData && !txJsonError) {
+                      transactionsData = txData
+                    } else {
+                      txHistoryError =
+                        txJsonError?.message ||
+                        'Erro ao processar histórico de transações.'
+                    }
+                  } else if (
+                    txResponse.data &&
+                    txResponse.data.status === 404
+                  ) {
+                    txHistoryError =
+                      'Histórico de transações não encontrado (404).'
+                    transactionsData = []
+                  } else {
+                    txHistoryError =
+                      txResponse.error?.message ||
+                      (txResponse.data
+                        ? await txResponse.data.text()
+                        : 'Erro ao buscar histórico de transações.')
+                  }
+
+                  // Return combined data
                   return {
                     status: 'success',
-                    data,
+                    data: {
+                      wallet: walletDataFromApi,
+                      transactions: transactionsData,
+                      error_wallet_info: walletInfoError,
+                      error_transactions: txHistoryError,
+                      message: userFriendlyMessage,
+                    },
                   }
                 } catch (error: any) {
                   return {
@@ -708,105 +809,28 @@ export const bot = Bot.create({
                 }
               },
             }),
-            get_user_wallet_history: tool({
-              description:
-                'Fetch recent transactions history for a Cardano wallet. You can specify address, count, and order (asc/desc).',
-              parameters: z.object({
-                address: z
-                  .string()
-                  .optional()
-                  .describe('Default is user account wallet'),
-                count: z.number().optional(),
-                order: z.enum(['asc', 'desc']).optional(),
-              }),
-              execute: async ({ address, count = 5, order = 'desc' }) => {
-                try {
-                  const apiKey =
-                    process.env.BLOCKFROST_API_KEY ||
-                    'mainnetzOIdFj09kjP6BFYffZbPu81a51nqGOJI'
-                  const wallet = address || settings.payment.wallet
-
-                  const url = `https://cardano-mainnet.blockfrost.io/api/v0/addresses/${wallet}/transactions?order=${order}&count=${count}`
-
-                  const response = await tryCatch(
-                    fetch(url, {
-                      headers: { project_id: apiKey },
-                    }),
-                  )
-
-                  if (!response.data) {
-                    return {
-                      status: 'error',
-                      error: 'Request error',
-                    }
-                  }
-
-                  if (!response.data.ok) {
-                    return {
-                      status: 'error',
-                      error: await response.data.text(),
-                    }
-                  }
-
-                  const { data, error } = await tryCatch(response.data.json())
-
-                  if (error || !data) {
-                    return {
-                      status: 'error',
-                      error: error || 'Could not fetch wallet transactions',
-                    }
-                  }
-
-                  return {
-                    status: 'success',
-                    data,
-                  }
-                } catch (error: any) {
-                  return {
-                    status: 'error',
-                    error:
-                      error?.message || 'Erro ao buscar transações da wallet.',
-                  }
-                }
-              },
-            }),
-          },
-          experimental_repairToolCall: async ({
-            error, // either NoSuchToolError or InvalidToolArgumentsError
-            toolCall, // flawed tool call generated by the LLM
-            tools, // available tools
-            parameterSchema, // helper to access json schema of tool call
-            messages, // messages & system prompt that triggered the step
-          }) => {
-            // do not attempt to fix invalid tool names:
-            if (NoSuchToolError.isInstance(error)) return null
-
-            // example: use a model with structured outputs for repair:
-            const tool = tools[toolCall.toolName as keyof typeof tools]
-
-            const { object: repairedArgs } = await generateObject({
-              model,
-              schema: tool.parameters as z.ZodObject<any>,
-              system: [
-                `The model tried to call the tool "${toolCall.toolName}" ` +
-                  `with the following arguments: \n` +
-                  JSON.stringify(toolCall.args) +
-                  `\nThe tool accepts the following schema: \n` +
-                  JSON.stringify(parameterSchema(toolCall)) +
-                  `\nPlease fix the arguments.`,
-                '\nMessages history:\n' + messages,
-              ].join('\n'),
-            })
-
-            // return the repaired tool call:
-            return {
-              toolCallId: toolCall.toolCallId,
-              toolCallType: toolCall.toolCallType,
-              toolName: toolCall.toolName,
-              args: JSON.stringify(repairedArgs),
-            }
           },
         })
+
+        if (finishReason === 'error') {
+          console.error('response', response)
+          console.error('response.body', response.body)
+
+          await bot.send({
+            provider: ctx.provider,
+            channel: ctx.channel.id,
+            content: {
+              type: 'text',
+              content: [
+                `⚠️ Ops! ${
+                  user.name.split(' ')[0]
+                }, ocorreu um erro. Por favor, tente novamente mais tarde, o suporte já foi avisado`,
+              ].join('\n'),
+            },
+          })
+
+          return
+        }
 
         const [, assistantMessage] = appendResponseMessages({
           messages: [messages[messages.length - 1]],

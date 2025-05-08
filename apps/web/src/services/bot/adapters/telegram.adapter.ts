@@ -381,7 +381,5 @@ export const telegram = Bot.adapter({
 
       // Handle other update types (callback_query, inline_query, etc.) or ignore them
       console.log("Received Telegram update type not handled:", Object.keys(update));
-      // You might throw an error or return a specific context indicating an unhandled event
-      throw new Error("Unhandled Telegram update type received.");
     },
 })
