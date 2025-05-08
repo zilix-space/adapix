@@ -19,7 +19,6 @@ import { whatsapp } from '../../adapters/whatsapp/adapter'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { readPixFromQrCodeFile } from '../../helpers/read-pix-from-qrcode'
 import { getUrl } from '@/helpers/get-url'
-import { getTransactionByIdAction } from '@/app/(dapp)/dapp/actions'
 
 const KEY = process.env.GEMINI_KEY || 'AIzaSyC7jXkCRurNRao6iM2302YJss1jUwP0iBE'
 
@@ -414,46 +413,146 @@ export const bot = Bot.create({
                 }
               },
             }),
-            create_transaction: tool({
+            create_buy_transaction: tool({
               description:
-                'Create a new transaction for the user (buy or sell). Use to initiate a deposit or withdrawal operation.',
+                'Create a new buy transaction (deposit) and sends checkout info. Amount should be in BRL.',
               parameters: z.object({
-                type: z.enum(['DEPOSIT', 'WITHDRAW']),
-                amount: z
-                  .number()
-                  .describe(
-                    'In WITHDRAW amout is in ADA and in DEPOSIT is BRL',
-                  ),
+                amount: z.number().describe('Amount in BRL to deposit'),
                 address: z
                   .string()
                   .optional()
                   .describe(
-                    'Withdraw needs a PIX Address. Deposit, a Wallet Address. If user, pass a QR Code, pass here PIX Code for WITHDRAW.',
+                    "Cardano wallet address to receive ADA. If not provided, uses user's registered wallet.",
                   ),
               }),
-              execute: async ({ type, amount, address }) => {
+              execute: async ({ amount, address }) => {
                 try {
-                  const types = {
-                    DEPOSIT: 'buy',
-                    WITHDRAW: 'sell',
-                  } as const
-
                   const transaction = await tryCatch(
                     modules.usecases.transaction.createTransaction.execute({
                       userId: user.id,
-                      type: types[type],
+                      type: 'buy',
                       amount,
                       address: address || settings.payment.wallet,
                     }),
                   )
 
-                  console.log(transaction)
+                  // Send checkout info
+                  await bot.send({
+                    provider: ctx.provider,
+                    channel: ctx.channel.id,
+                    content: {
+                      type: 'text',
+                      content: [
+                        '🧾 Aqui estão os detalhes do seu checkout:',
+                        '',
+                        `• Tipo: Compra de ADA`,
+                        `• Valor a pagar: ${transaction.data.fromAmount} ${transaction.data.fromCurrency}`,
+                        `• Você receberá: ${transaction.data.toAmount} ${transaction.data.toCurrency}`,
+                        `• Status: ${transaction.data.status}`,
+                        transaction.data.expiresAt
+                          ? `• Expira em: ${new Date(
+                              transaction.data.expiresAt,
+                            ).toLocaleString('pt-BR')}`
+                          : '',
+                        '',
+                        'Siga as instruções abaixo para concluir sua compra:',
+                        '1️⃣ Realize o pagamento PIX utilizando o código informado na próxima mensagem.',
+                        '',
+                        'Após realizar o pagamento, aguarde a confirmação. Se tiver dúvidas, entre em contato com o suporte.',
+                      ]
+                        .filter(Boolean)
+                        .join('\n'),
+                    },
+                  })
+
+                  // Send payment address separately
+                  await bot.send({
+                    provider: ctx.provider,
+                    channel: ctx.channel.id,
+                    content: {
+                      type: 'text',
+                      content: transaction.data.addressToReceive,
+                    },
+                  })
 
                   return transaction
                 } catch (error: any) {
                   return {
                     status: 'error',
-                    error: error?.message || 'Erro ao criar transação.',
+                    error:
+                      error?.message || 'Erro ao criar transação de compra.',
+                  }
+                }
+              },
+            }),
+            create_sell_transaction: tool({
+              description:
+                'Create a new sell transaction (withdrawal) and sends checkout info. Amount should be in ADA.',
+              parameters: z.object({
+                amount: z.number().describe('Amount in ADA to sell'),
+                address: z
+                  .string()
+                  .optional()
+                  .describe(
+                    "PIX key to receive BRL. If not provided, uses user's registered PIX key.",
+                  ),
+              }),
+              execute: async ({ amount, address }) => {
+                try {
+                  const transaction = await tryCatch(
+                    modules.usecases.transaction.createTransaction.execute({
+                      userId: user.id,
+                      type: 'sell',
+                      amount,
+                      address: address || settings.payment.pix,
+                    }),
+                  )
+
+                  // Send checkout info
+                  await bot.send({
+                    provider: ctx.provider,
+                    channel: ctx.channel.id,
+                    content: {
+                      type: 'text',
+                      content: [
+                        '🧾 Aqui estão os detalhes do seu checkout:',
+                        '',
+                        `• Tipo: Venda de ADA`,
+                        `• Valor a enviar: ${transaction.data.fromAmount} ${transaction.data.fromCurrency}`,
+                        `• Você receberá: ${transaction.data.toAmount} ${transaction.data.toCurrency}`,
+                        `• Status: ${transaction.data.status}`,
+                        transaction.data.expiresAt
+                          ? `• Expira em: ${new Date(
+                              transaction.data.expiresAt,
+                            ).toLocaleString('pt-BR')}`
+                          : '',
+                        '',
+                        'Siga as instruções abaixo para concluir sua venda:',
+                        '1️⃣ Envie o valor em ADA para o endereço Cardano informado na próxima mensagem.',
+                        '',
+                        'Após realizar o envio, aguarde a confirmação. Se tiver dúvidas, entre em contato com o suporte.',
+                      ]
+                        .filter(Boolean)
+                        .join('\n'),
+                    },
+                  })
+
+                  // Send wallet address separately
+                  await bot.send({
+                    provider: ctx.provider,
+                    channel: ctx.channel.id,
+                    content: {
+                      type: 'text',
+                      content: transaction.data.addressToReceive,
+                    },
+                  })
+
+                  return transaction
+                } catch (error: any) {
+                  return {
+                    status: 'error',
+                    error:
+                      error?.message || 'Erro ao criar transação de venda.',
                   }
                 }
               },
@@ -462,9 +561,9 @@ export const bot = Bot.create({
               description:
                 'Extract PIX information from a QR Code image sent by the user. Use only for images.',
               parameters: z.object({
-                url: z.string(),
+                url: z.string().optional(),
               }),
-              execute: async ({ url }) => {
+              execute: async () => {
                 try {
                   if (ctx.message.content.type !== 'image') {
                     return {
@@ -501,7 +600,7 @@ export const bot = Bot.create({
               parameters: z.object({
                 count: z.number().optional(),
               }),
-              execute: async ({ count }) => {
+              execute: async () => {
                 try {
                   const response = await tryCatch(
                     fetch(`https://admin.cardanofeed.com/api/articles`),
@@ -513,8 +612,6 @@ export const bot = Bot.create({
                       error: 'Request error',
                     }
                   }
-
-                  console.log(response.data)
 
                   if (!response.data.ok) {
                     return {
@@ -670,62 +767,6 @@ export const bot = Bot.create({
                     error:
                       error?.message || 'Erro ao buscar transações da wallet.',
                   }
-                }
-              },
-            }),
-            send_transaction_checkout_to_user: tool({
-              description: 'Send a checkout to the user',
-              parameters: z.object({
-                transactionId: z.string().uuid(),
-              }),
-              execute: async ({ transactionId }) => {
-                const transaction = await getTransactionByIdAction({
-                  id: transactionId,
-                })
-
-                // Mensagem de instrução para o checkout
-                await bot.send({
-                  provider: ctx.provider,
-                  channel: ctx.channel.id,
-                  content: {
-                    type: 'text',
-                    content: [
-                      '🧾 Aqui estão os detalhes do seu checkout:',
-                      '',
-                      `• Tipo: ${transaction.type}`,
-                      `• Valor de origem: ${transaction.fromAmount} ${transaction.fromCurrency}`,
-                      `• Valor de destino: ${transaction.toAmount} ${transaction.toCurrency}`,
-                      `• Status: ${transaction.status}`,
-                      transaction.expiresAt
-                        ? `• Expira em: ${new Date(
-                            transaction.expiresAt,
-                          ).toLocaleString('pt-BR')}`
-                        : '',
-                      '',
-                      'Siga as instruções abaixo para concluir sua transação:',
-                      transaction.type === 'DEPOSIT'
-                        ? '1️⃣ Envie o valor para o endereço de carteira informado na próxima mensagem.'
-                        : '1️⃣ Realize o pagamento PIX utilizando o código informado na próxima mensagem.',
-                      '',
-                      'Após realizar o pagamento, aguarde a confirmação. Se tiver dúvidas, entre em contato com o suporte.',
-                    ]
-                      .filter(Boolean)
-                      .join('\n'),
-                  },
-                })
-
-                await bot.send({
-                  provider: ctx.provider,
-                  channel: ctx.channel.id,
-                  content: {
-                    type: 'text',
-                    content: transaction.addressToReceive,
-                  },
-                })
-
-                return {
-                  status: 'success',
-                  data: 'O checkout foi enviado para o usuário e duas mensagens foi enviada, uma com os detalhes do checkout e outra com o endereço da wallet. Agora, apenas aguarde o retorno do usuário e sugira se pode ajudar com mais alguma coisa. ',
                 }
               },
             }),
