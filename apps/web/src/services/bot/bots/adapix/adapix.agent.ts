@@ -97,7 +97,28 @@ export const bot = Bot.create({
             channel: ctx.channel.id,
             content: {
               type: 'text',
-              content: 'User not found',
+              content: [
+                '👋 Olá! Para utilizar o assistente Adapix, você precisa ter uma conta cadastrada.',
+                '',
+                'Acesse agora: https://adapix.com.br',
+                '',
+                'Faça seu cadastro gratuitamente e volte aqui para conversar comigo!',
+                '',
+                'Se você já tem cadastro, mas ainda não vinculou seu Telegram à sua conta Adapix, siga este passo a passo:',
+                '',
+                '1️⃣ Acesse https://adapix.com.br e faça login.',
+                '2️⃣ Clique na sua foto de perfil no canto superior direito.',
+                '3️⃣ Vá em "Configurações".',
+                '4️⃣ Procure pela seção "Telegram".',
+                '5️⃣ Adicione o seu ID do Telegram e salve.',
+                '',
+                'Como descobrir seu ID do Telegram:',
+                '• Abra o Telegram e procure pelo bot @userinfobot.',
+                '• Inicie uma conversa com ele e envie o comando /start.',
+                '• O bot irá mostrar seu ID numérico. Copie esse número e cole na sua conta Adapix.',
+                '',
+                'Depois de cadastrar seu ID do Telegram, volte aqui e envie uma mensagem para começar a usar o assistente!',
+              ].join('\n'),
             },
           })
 
@@ -111,7 +132,28 @@ export const bot = Bot.create({
             channel: ctx.channel.id,
             content: {
               type: 'text',
-              content: 'User settings not found',
+              content: [
+                '⚠️ Não encontramos as configurações da sua conta.',
+                '',
+                'Acesse https://adapix.com.br, faça login e complete seu cadastro para usar o assistente.',
+              ].join('\n'),
+            },
+          })
+
+          return
+        }
+
+        if (settings.kyc.status !== 'approved') {
+          await bot.send({
+            provider: ctx.provider,
+            channel: ctx.channel.id,
+            content: {
+              type: 'text',
+              content: [
+                '⚠️ Seu cadastro não foi aprovado.',
+                '',
+                'Acesse https://adapix.com.br, faça login e complete seu cadastro para usar o assistente.',
+              ].join('\n'),
             },
           })
 
