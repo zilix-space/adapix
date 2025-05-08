@@ -12,37 +12,72 @@ import { z } from 'zod'
 import { formatCurrency } from '@/helpers/format-currency'
 import { APP_CONFIGS } from '@/boilerplate.config'
 import { renderAsync } from '@react-email/components'
+import { mapApiError, formatErrorMessage } from '@/utils/error-mappers'
+import { normalizeAmount } from '@/utils/transaction-utils'
 
 export const createTransactionAction = client.action({
   name: 'transaction.create',
   type: 'mutate',
   schema: createTransactionActionSchema,
   handler: async ({ input, context }) => {
-    const isBuy = input.type === 'buy'
-    const valueNumber = Number(input.amount.replace(/\D/g, '') || '0') / 100
+    const valueNumber = normalizeAmount(input.amount || '0')
 
-    const transaction =
-      await modules.usecases.transaction.createTransaction.execute({
-        type: input.type,
-        amount: valueNumber,
-        address: isBuy ? input.address : context.user.settings.payment.pix,
-        userId: context.user.id,
+    if (input.type === 'pay' && !input.address) {
+      throw new Error('Address is required for pay transactions')
+    }
+
+    if (input.type === 'pay') {
+      input.type = 'buy'
+    }
+
+    // Verificar limites máximos definidos por variáveis de ambiente
+    const limits = {
+      buy: Number(process.env.NEXT_PUBLIC_TRANSACTION_LIMIT_BUY) || 200,
+      sell: Number(process.env.NEXT_PUBLIC_TRANSACTION_LIMIT_SELL) || 100,
+    }
+
+    if (valueNumber > limits[input.type]) {
+      throw new Error(
+        `Valor máximo para ${input.type} é de ${formatCurrency(
+          limits[input.type as 'buy' | 'sell'],
+          'BRL',
+        )}`,
+      )
+    }
+
+    const address = {
+      buy: input.address || context.user.settings.payment.wallet,
+      sell: input.address || context.user.settings.payment.wallet,
+    }
+
+    try {
+      const transaction =
+        await modules.usecases.transaction.createTransaction.execute({
+          type: input.type,
+          amount: valueNumber,
+          address: address[input.type],
+          userId: context.user.id,
+        })
+
+      await modules.provider.mail.send({
+        from: APP_CONFIGS.providers.mail.resend.from,
+        to: context.user.email,
+        subject: `Transação iniciada - ID: ${transaction.id}`,
+        body: await renderAsync(
+          TransactionStarted({
+            email: context.user.email,
+            name: context.user.name,
+            transaction,
+          }),
+        ),
       })
 
-    await modules.provider.mail.send({
-      from: APP_CONFIGS.providers.mail.resend.from,
-      to: context.user.email,
-      subject: `Transação iniciada - ID: ${transaction.id}`,
-      body: await renderAsync(
-        TransactionStarted({
-          email: context.user.email,
-          name: context.user.name,
-          transaction,
-        }),
-      ),
-    })
-
-    return transaction
+      return transaction
+    } catch (error) {
+      // Mapear e propagar erros usando o sistema de mapeamento
+      const mappedError = mapApiError(error as string | Error)
+      throw new Error(formatErrorMessage(mappedError))
+    }
   },
 })
 
@@ -53,27 +88,48 @@ export const estimateTransactionAction = client.action({
   handler: async ({ input }) => {
     if (!input.amount) return null
 
-    const valueNumber = Number(input.amount.replace(/\D/g, '') || '0') / 100
+    const valueNumber = normalizeAmount(input.amount || '0')
 
-    const values = {
-      buy: {
-        min: 60,
-        max: 200,
-      },
-      sell: {
-        min: 30,
-        max: 100,
-      },
+    const limits = {
+      buy: Number(process.env.NEXT_PUBLIC_TRANSACTION_LIMIT_BUY) || 250,
+      sell: Number(process.env.NEXT_PUBLIC_TRANSACTION_LIMIT_SELL) || 250,
     }
 
-    if (valueNumber < values[input.type].min) {
-      return null
+    if (input.type === 'pay') {
+      input.type = 'buy'
     }
 
-    return modules.usecases.transaction.estimateTransaction.execute({
-      type: input.type,
-      amount: valueNumber,
-    })
+    if (valueNumber > limits[input.type]) {
+      return {
+        success: false,
+        error: `Valor máximo para ${input.type} é de ${formatCurrency(
+          limits[input.type as 'buy' | 'sell'],
+          'BRL',
+        )}`,
+      }
+    }
+
+    try {
+      const estimate =
+        await modules.usecases.transaction.estimateTransaction.execute({
+          type: input.type,
+          amount: valueNumber,
+        })
+
+      return {
+        success: true,
+        data: estimate,
+      }
+    } catch (error) {
+      // Usar o sistema de mapeamento para gerar erro consistente
+      const mappedError = mapApiError(error as string | Error)
+      return {
+        success: false,
+        error: formatErrorMessage(mappedError),
+        errorCode: mappedError.code,
+        suggestion: mappedError.suggestion,
+      }
+    }
   },
 })
 

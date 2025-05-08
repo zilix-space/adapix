@@ -4,6 +4,8 @@ import { PageWrapper } from './_components/page-wrapper'
 import { HeroSection } from './_components/hero-section'
 import { HowToWorksSection } from './_components/how-to-works-section'
 import { FAQSectionAda } from './_components/faq-section-ada'
+import { AdapixAiCTA } from './_components/adapix-ai-cta'
+import { getAdaQuoteAction } from './actions'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -13,12 +15,15 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-export default function Page() {
+export default async function Page() {
+  const { quote } = await getAdaQuoteAction()
+
   return (
     <PageWrapper>
       <div className="space-y-12">
-        <HeroSection />
+        <HeroSection quote={quote} />
         <HowToWorksSection />
+        <AdapixAiCTA />
         <FAQSectionAda />
       </div>
       <div className="hidden md:block relative h-full">

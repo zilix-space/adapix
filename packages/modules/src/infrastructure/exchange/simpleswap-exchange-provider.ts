@@ -49,8 +49,7 @@ export class SimpleSwapExchangeProvider implements IExchangeProvider {
         validUntil: response.data.validUntil,
       }
     } catch (error: any) {
-      console.error(error.response.data)
-      throw new Error('Error getting estimate for exchange')
+      throw new Error(error.response.data.error)
     }
   }
 

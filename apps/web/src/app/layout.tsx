@@ -7,11 +7,12 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import { GeistSans } from 'geist/font/sans'
 import { getLocaleFromRequest } from '@/services/internationalization/helpers/get-locale-from-request'
 import { getApplicationSession } from '@/services/session/get-application-session'
-
-import '@design-system/react/style.scss'
-import CrispChat from './_components/crisp'
 import { LocaleProvider } from '@/services/internationalization/contexts/locale.context'
 import { ApplicationProvider } from '@/contexts/app.context'
+
+import CrispChat from './_components/crisp'
+
+import '@design-system/react/style.scss'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0

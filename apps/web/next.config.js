@@ -6,11 +6,6 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // compiler: {
-  //   removeConsole: {
-  //     exclude: ['info'],
-  //   },
-  // },
 
   webpack: function(config, { isServer }) {
     // @dqbd/tiktoken: enable asynchronous WebAssembly
@@ -32,19 +27,22 @@ const nextConfig = {
 
     return config;
   },  
-  transpilePackages: ['design-system/react', '@meshsdk/react'],
+  transpilePackages: ['design-system/react'],
   logging: {
 		fetches: {
 			fullUrl: true,
 		},
 	},
+  serverExternalPackages: [
+    '@meshsdk/core',
+    '@meshsdk/react'
+  ],
   experimental: {
     esmExternals: true,
-    serverComponentsExternalPackages: ['@meshsdk/core'],
+    instrumentationHook: true,
     staleTimes: {
 			dynamic: 0,
 		},
-
   },
   images: {
     remotePatterns: [

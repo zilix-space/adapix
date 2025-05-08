@@ -7,6 +7,7 @@
     "clean": "git clean -xdf node_modules",
     "clean:workspaces": "turbo clean",
     "db:migrate:deploy": "yarn with-env turbo db:migrate:deploy",
+    "db:migrate:dev": "yarn with-env turbo db:migrate:dev",
     "db:generate": "yarn with-env turbo db:generate",
     "db:push": "yarn with-env turbo db:push db:generate",
     "dev": "yarn with-env turbo dev --parallel",
@@ -28,6 +29,5 @@
   "workspaces": [
     "apps/web",
     "packages/**"
-  ],
-  "dependencies": {}
+  ]
 }

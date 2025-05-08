@@ -28,15 +28,15 @@ export const dynamicParams = true
 
 export default async function Page() {
   return (
-    <div className="flex flex-col space-y-6 h-full">
-      <header className="bg-secondary -mx-6 -mt-6 px-6 py-6 space-y-8 border-b border-border">
+    <div className="h-full gap-y-4 grid grid-rows-[auto_1fr]">
+      <header className="bg-secondary -mx-6 -mt-6 px-6 py-6 space-y-8 border-b border-border w-screen">
         <div className="flex items-center justify-between">
           <DynamicUserNav />
           <HeaderToolbar />
         </div>
         <DynamicWalletSummary />{' '}
       </header>
-      <main className="space-y-8 h-full flex-grow">
+      <main className="space-y-8 flex-grow">
         <DynamicTransactionForm />
         <WalletTransactionList />
       </main>

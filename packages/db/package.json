@@ -22,11 +22,11 @@
     "studio": "prisma studio"
   },
   "dependencies": {
-    "@prisma/client": "^5.17.0"
+    "@prisma/client": "5.17.0"
   },
   "devDependencies": {
     "@app/tsconfig": "*",
-    "prisma": "^5.17.0",
+    "prisma": "5.17.0",
     "tsup": "^7.1.0",
     "tsx": "^3.7.1",
     "typescript": "^5"

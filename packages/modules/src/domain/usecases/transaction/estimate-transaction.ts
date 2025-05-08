@@ -55,8 +55,6 @@ export class EstimateTransactionUseCase {
       },
     )
 
-    console.log(exchangeEstimate)
-
     const totalAda = exchangeEstimate.outAmount
     const fee =
       Number(fiatEstimate.feeInFiat) +

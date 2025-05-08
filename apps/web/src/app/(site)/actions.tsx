@@ -1,3 +1,5 @@
+'use server'
+
 import { client } from '@/services/actions/public-client'
 import { modules } from '@app/modules/src'
 import { cache } from 'react'
