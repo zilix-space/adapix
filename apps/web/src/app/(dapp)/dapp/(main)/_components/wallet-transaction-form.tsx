@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowDownIcon,
@@ -10,7 +10,6 @@ import {
   QrCodeIcon,
   CheckCircleIcon,
   InfoIcon,
-  AlertCircle,
   AlertCircleIcon,
   Loader2,
 } from 'lucide-react'
@@ -20,11 +19,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@design-system/react/components/ui/drawer'
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from '@design-system/react/components/ui/alert'
 import { Button, ButtonIcon } from '@design-system/react/components/ui/button'
 import {
   Tooltip,
@@ -49,29 +43,22 @@ import {
 import { createTransactionActionSchema } from '../../schemas'
 import { TransactionPreview } from './transaction-preview'
 import { QrReader } from 'react-qr-reader'
-import { PixDataPreview } from './pix-data-preview'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { mapApiError, formatErrorMessage } from '@/utils/error-mappers'
-import {
-  createEstimateParams,
-  normalizeAmount,
-} from '@/utils/transaction-utils'
-import { useDebounce } from '@/hooks/use-debounce'
 import { cn } from '@design-system/react/helpers/cn'
 import { useApplication } from '@/hooks/use-application'
 import { useWallet } from '../../_hooks/use-wallet'
 import { useAction, useActionForm } from '@/services/actions/lib/client'
 import { PixQRData, parsePixQR } from '@/helpers/parse-pix-qr'
+import { debounce } from 'lodash'
+import { toast } from '@design-system/react/components/ui/use-toast'
 
 // Tipos
 type TransactionType = 'sell' | 'buy' | 'pay'
-type PaymentMethod = 'pix' | 'wallet'
 
 // Componente principal
 export default function WalletTransactionForm() {
   // Estado local
-  const [transactionType, setTransactionType] = useState<TransactionType>('buy')
-  const [payCurrency, setPayCurrency] = useState<PaymentMethod>('pix')
   const [showQrReader, setShowQrReader] = useState(false)
   const [showQrDrawer, setShowQrDrawer] = useState(false)
   const [qrError, setQrError] = useState<string | null>(null)
@@ -101,8 +88,10 @@ export default function WalletTransactionForm() {
     },
     onSubmitSuccess: async (result) => {
       if (result.type === 'WITHDRAW') {
+        console.log('Iniciando transação de wallet:', result)
         await wallet.startTransaction(result.exchangeAddress, result.fromAmount)
       }
+
       router.push(`/dapp/transactions/${result.id}`)
     },
     onSubmitError: (error) => {
@@ -114,92 +103,57 @@ export default function WalletTransactionForm() {
     },
   })
 
-  // Obter valores do formulário e aplicar debounce
-  const watchedValues = form.watch()
-  const debouncedAmount = useDebounce(watchedValues.amount, 500)
-  const debouncedType = useDebounce(watchedValues.type, 300)
+  const handleEstimate = debounce(async (amount: string) => {
+    if (!amount) return
 
-  // Efeito para atualizar a carteira
-  useEffect(() => {
-    form.setValue('address', wallet.current?.address)
-  }, [wallet.current?.address])
+    setIsEstimating(true)
 
-  // Efeito para processar estimativa de transação quando valores mudam
-  useEffect(() => {
-    // Somente executar se houver um valor
-    const amount = normalizeAmount(debouncedAmount || '0')
-    if (amount === 0) return
+    try {
+      const address = form.getValues('address')
 
-    const handleEstimate = async () => {
-      setIsEstimating(true)
-      try {
-        const estimateParams = createEstimateParams({
-          type: watchedValues.type as TransactionType,
-          amount: debouncedAmount || '0',
-        })
+      const result = await estimate.execute({
+        amount,
+        address,
+        type: transactionType as TransactionType,
+      })
 
-        const result = await estimate.execute(estimateParams)
-
-        if (!result.success && result.error) {
-          form.setError('amount', {
-            message: result.error,
-            type: 'validate',
-          })
-        } else {
-          form.clearErrors('amount')
-        }
-      } catch (error) {
-        console.error('Erro ao estimar transação:', error)
-        const mappedError = mapApiError(error as string | Error)
+      // Setting form errors inside a requestAnimationFrame to avoid triggering
+      // immediate re-renders that might cause loops
+      if (!result.success && result.error) {
         form.setError('amount', {
-          message: formatErrorMessage(mappedError),
-        })
-      } finally {
-        setIsEstimating(false)
-      }
-    }
-
-    handleEstimate()
-  }, [debouncedAmount, debouncedType])
-
-  // Efeito para transição entre tipos
-  useEffect(() => {
-    const handleTypeChange = async () => {
-      // Limpa o valor para evitar estimativas com valores antigos
-      form.setValue('amount', '')
-
-      // Define o endereço para o da carteira atual
-      form.setValue('address', wallet.current?.address)
-    }
-
-    handleTypeChange()
-  }, [watchedValues.type, payCurrency])
-
-  // Efeito para validar saldo da carteira em caso de venda
-  useEffect(() => {
-    const validateWalletBalance = async () => {
-      if (watchedValues.type !== 'sell') return
-
-      const amount = normalizeAmount(watchedValues.amount || '0')
-      if (amount === 0) return
-
-      const isValid = await wallet.validateTransaction(amount)
-
-      if (isValid) {
-        form.setError('amount', {
-          message: 'Sem saldo',
+          message: result.error,
+          type: 'validate',
         })
       } else {
-        // Só limpa se o erro for de saldo. Mantém outros erros (ex: out_of_range)
-        const currentError = form.formState.errors.amount?.message
-        if (currentError && currentError.includes('saldo')) {
-          form.clearErrors('amount')
-        }
+        form.clearErrors('amount')
       }
+    } catch (error) {
+      console.error('Erro ao estimar transação:', error)
+      const mappedError = mapApiError(error as string | Error)
+
+      form.setError('amount', {
+        message: formatErrorMessage(mappedError),
+      })
+    } finally {
+      setIsEstimating(false)
+    }
+  }, 1500)
+
+  const handleTypeChange = async (type: TransactionType) => {
+    form.setValue('type', type)
+    form.setValue('amount', '')
+    await estimate.execute({ type, amount: '' })
+
+    // Se mudar para modo 'pay', limpa os dados do PIX anterior e configura o formulário
+    if (type === 'pay') {
+      setPixData(null)
+      form.setValue('address', '') // Limpa o endereço anterior
+      return
     }
 
-    validateWalletBalance()
-  }, [watchedValues.amount, watchedValues.type])
+    // Define o endereço para o da carteira atual
+    form.setValue('address', wallet.current?.address)
+  }
 
   // Manipulador para abertura da câmera QR
   const handleOpenQrReader = async () => {
@@ -239,23 +193,38 @@ export default function WalletTransactionForm() {
   }
 
   // Manipulador para processamento de QR code
-  const handleQrResult = (result: any) => {
-    if (!result) return
+  const handleQrResult = (result: any | string) => {
+    console.log(result)
 
-    const qrValue = result.getText()
+    if (!result) {
+      return
+    }
+
+    const qrValue = typeof result === 'string' ? result : result.getText()
     console.log('QR Code lido com sucesso:', qrValue)
 
-    // Processar QR PIX quando aplicável
-    if (payCurrency === 'pix') {
-      const parsedPixData = parsePixQR(qrValue)
-      if (parsedPixData) {
-        console.log('Dados PIX detectados:', parsedPixData)
-        setPixData(parsedPixData)
+    // Processar QR PIX
+    const parsedPixData = parsePixQR(qrValue)
+    if (parsedPixData) {
+      console.log('Dados PIX detectados:', parsedPixData)
+      setPixData(parsedPixData)
 
-        // Preencher valor se disponível no QR PIX
-        if (parsedPixData.value) {
-          form.setValue('amount', String(parsedPixData.value * 100))
-        }
+      // Preencher valor se disponível no QR PIX
+      if (parsedPixData.value) {
+        console.log('Valor PIX detectado:', parsedPixData.value)
+        const amount = parsedPixData.value * 100
+
+        // O valor está em BRL, mas será tratado corretamente por createEstimateParams
+        form.setValue('amount', String(amount))
+        // Definimos o tipo como 'pay' para que seja tratado como venda com valor em BRL
+        form.setValue('type', 'pay')
+
+        handleEstimate(amount.toString())
+
+        toast({
+          title: 'Transação iniciada',
+          description: 'A transação foi iniciada com sucesso.',
+        })
       }
     }
 
@@ -272,20 +241,35 @@ export default function WalletTransactionForm() {
     }, 100)
   }
 
-  function isValid(): boolean {
+  const isValid = useCallback(() => {
     const userWalletAddress = wallet.current?.address
 
     const transactionEstimate = estimate.response?.data
-    const transactionType = form.getValues('type')
+    const currentTransactionType = form.getValues('type')
     const transactionAddress = form.getValues('address')
 
     const isSubmitting = form.actionState.isSubmitting
-    const isWalletDisconnected = userWalletAddress && transactionType !== 'pay'
+    const isWalletDisconnected =
+      !userWalletAddress && currentTransactionType !== 'pay'
     const isEstimateInvalid = !transactionEstimate
     const isFromAmountZero = transactionEstimate?.fromAmount === 0
-    const isPayAddressMissing = transactionType === 'pay' && transactionAddress
+    const isPayAddressMissing =
+      currentTransactionType === 'pay' && !transactionAddress
+    const isPixDataMissing = currentTransactionType === 'pay' && !pixData
     const isCurrentlyEstimating = isEstimating
     const hasAmountError = Boolean(form.formState.errors.amount)
+
+    // Para depuração
+    console.log('Validação de formulário:', {
+      currentTransactionType,
+      isWalletDisconnected,
+      isEstimateInvalid,
+      isFromAmountZero,
+      isPayAddressMissing,
+      isPixDataMissing,
+      isCurrentlyEstimating,
+      hasAmountError,
+    })
 
     return !!(
       isSubmitting ||
@@ -293,10 +277,11 @@ export default function WalletTransactionForm() {
       isEstimateInvalid ||
       isFromAmountZero ||
       isPayAddressMissing ||
+      isPixDataMissing ||
       isCurrentlyEstimating ||
       hasAmountError
     )
-  }
+  }, [])
 
   function getTransactionButtonLabel(): string {
     if (transactionType === 'pay') {
@@ -337,25 +322,7 @@ export default function WalletTransactionForm() {
     },
   }
 
-  // Mapeamento para métodos de pagamento
-  const paymentMethodConfig = {
-    pix: {
-      icon: <CameraIcon className="w-4 h-4 flex-shrink-0" />,
-      label: 'Chave PIX',
-      addressLabel: 'Chave PIX de destino',
-      placeholder: 'Chave PIX',
-      scanInstructionText: 'uma chave PIX',
-      currency: 'ADA',
-    },
-    wallet: {
-      icon: <QrCodeIcon className="w-4 h-4 flex-shrink-0" />,
-      label: 'Carteira ADA',
-      addressLabel: 'Wallet de destino',
-      placeholder: 'Endereço da wallet',
-      scanInstructionText: 'um endereço de wallet',
-      currency: 'BRL',
-    },
-  }
+  const transactionType = form.watch('type')
 
   return (
     <Form
@@ -382,26 +349,26 @@ export default function WalletTransactionForm() {
                 <FormControl>
                   <CurrencyInput
                     placeholder={
-                      transactionType === 'pay'
-                        ? payCurrency === 'pix'
-                          ? 'Valor em ADA'
-                          : 'Valor em R$'
+                      field.value === 'pay'
+                        ? 'Valor em R$'
                         : transactionTypeConfig[transactionType]
                             .amountPlaceholder
                     }
                     currency={
-                      transactionType === 'pay'
-                        ? payCurrency === 'pix'
-                          ? 'ADA'
-                          : 'BRL'
-                        : transactionType === 'buy'
-                        ? 'BRL'
-                        : 'ADA'
+                      {
+                        buy: 'BRL',
+                        sell: 'ADA',
+                        pay: 'BRL',
+                      }[transactionType] as 'BRL' | 'ADA'
                     }
                     locale="pt-BR"
                     variant="lined"
                     className="text-xl font-semibold leading-none"
                     {...field}
+                    onChange={async (e) => {
+                      field.onChange(e)
+                      handleEstimate(e.target.value)
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -421,17 +388,12 @@ export default function WalletTransactionForm() {
                         <button
                           type="button"
                           className="text-center flex flex-col items-center justify-center"
-                          onClick={() => {
-                            field.onChange('buy')
-                            setTransactionType('buy')
-                            form.setValue('amount', '')
-                          }}
+                          onClick={() => handleTypeChange('buy')}
                         >
                           <span
                             className={cn([
                               'w-10 h-10 rounded-full bg-secondary flex items-center justify-center',
-                              transactionType === 'buy' &&
-                                'bg-primary text-white',
+                              field.value === 'buy' && 'bg-primary text-white',
                             ])}
                           >
                             {transactionTypeConfig.buy.icon}
@@ -453,16 +415,12 @@ export default function WalletTransactionForm() {
                         <button
                           type="button"
                           className="text-center flex flex-col items-center justify-center"
-                          onClick={() => {
-                            field.onChange('sell')
-                            setTransactionType('sell')
-                          }}
+                          onClick={() => handleTypeChange('sell')}
                         >
                           <span
                             className={cn([
                               'w-10 h-10 rounded-full bg-secondary flex items-center justify-center',
-                              transactionType === 'sell' &&
-                                'bg-primary text-white',
+                              field.value === 'sell' && 'bg-primary text-white',
                             ])}
                           >
                             {transactionTypeConfig.sell.icon}
@@ -484,17 +442,12 @@ export default function WalletTransactionForm() {
                         <button
                           type="button"
                           className="text-center flex flex-col items-center justify-center"
-                          onClick={() => {
-                            field.onChange('pay')
-                            setTransactionType('pay')
-                            form.setValue('amount', '')
-                          }}
+                          onClick={() => handleTypeChange('pay')}
                         >
                           <span
                             className={cn([
                               'w-10 h-10 rounded-full bg-secondary flex items-center justify-center',
-                              transactionType === 'pay' &&
-                                'bg-primary text-white',
+                              field.value === 'pay' && 'bg-primary text-white',
                             ])}
                           >
                             {transactionTypeConfig.pay.icon}
@@ -519,43 +472,15 @@ export default function WalletTransactionForm() {
         {transactionType === 'pay' && (
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <InfoIcon className="w-4 h-4 text-primary" />
-                Para onde enviar?
-              </label>
-              <div className="flex gap-2 w-full">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPayCurrency('pix')
-                    form.setValue('amount', '')
-                  }}
-                  className={cn([
-                    'flex-1 py-2 px-3 rounded-md border font-medium text-sm transition-all duration-200 flex items-center gap-2',
-                    payCurrency === 'pix'
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border hover:bg-secondary',
-                  ])}
-                >
-                  {paymentMethodConfig.pix.icon}
-                  <span>{paymentMethodConfig.pix.label}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPayCurrency('wallet')
-                    form.setValue('amount', '')
-                  }}
-                  className={cn([
-                    'flex-1 py-2 px-3 rounded-md border font-medium text-sm transition-all duration-200 flex items-center gap-2',
-                    payCurrency === 'wallet'
-                      ? 'border-primary bg-primary/10 text-primary'
-                      : 'border-border hover:bg-secondary',
-                  ])}
-                >
-                  {paymentMethodConfig.wallet.icon}
-                  <span>{paymentMethodConfig.wallet.label}</span>
-                </button>
+              <div className="bg-primary/10 p-3 rounded-md mb-2">
+                <label className="text-sm font-medium flex items-center gap-2 text-primary">
+                  <InfoIcon className="w-4 h-4 flex-shrink-0" />
+                  <span>Pague boletos e chaves PIX usando sua ADA</span>
+                </label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Escaneie um QR code PIX ou informe a chave PIX de destino e o
+                  valor a ser pago em reais.
+                </p>
               </div>
             </div>
 
@@ -564,23 +489,19 @@ export default function WalletTransactionForm() {
               name="address"
               render={({ field }) => (
                 <FormItem variant="unstyled" className="space-y-0">
-                  <FormLabel>
-                    {payCurrency === 'pix'
-                      ? 'Chave PIX de destino'
-                      : 'Wallet de destino'}
-                  </FormLabel>
+                  <FormLabel>Chave PIX de destino</FormLabel>
                   <FormControl>
                     <div className="flex gap-2 items-center">
                       <input
                         ref={addressInputRef}
                         type="text"
-                        placeholder={
-                          payCurrency === 'pix'
-                            ? 'Chave PIX'
-                            : 'Endereço da wallet'
-                        }
+                        placeholder="Chave PIX (CPF, telefone, email, etc.)"
                         className="w-full border rounded-md px-3 py-2"
                         {...field}
+                        onChange={(e) => {
+                          handleQrResult(e.target.value)
+                          field.onChange(e.target.value)
+                        }}
                       />
                       <Button
                         type="button"
@@ -600,68 +521,6 @@ export default function WalletTransactionForm() {
                   </FormControl>
                   <FormMessage />
 
-                  {/* Modal QR para Desktop */}
-                  {showQrReader && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 backdrop-blur-sm animate-in fade-in">
-                      <div className="bg-card border border-border shadow-lg rounded-lg p-4 max-w-md w-full flex flex-col items-center animate-in zoom-in-95 duration-200">
-                        <div className="flex items-center justify-between w-full mb-3">
-                          <h3 className="text-lg font-semibold text-card-foreground">
-                            Escanear QR Code
-                          </h3>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 rounded-full"
-                            onClick={() => setShowQrReader(false)}
-                          >
-                            &times;
-                          </Button>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3 w-full">
-                          Aponte a câmera para um QR Code válido com{' '}
-                          {payCurrency === 'pix'
-                            ? 'uma chave PIX'
-                            : 'um endereço de wallet'}
-                        </p>
-                        <div className="w-full aspect-square relative border-2 border-dashed border-primary/30 rounded-lg overflow-hidden mb-3">
-                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                            <div className="w-3/4 h-3/4 border-2 border-primary rounded-lg animate-pulse opacity-60"></div>
-                          </div>
-                          <QrReader
-                            constraints={{
-                              facingMode: 'environment',
-                              aspectRatio: 1,
-                              width: { ideal: 1080 },
-                              height: { ideal: 1080 },
-                            }}
-                            onResult={(result, error) => {
-                              if (result) {
-                                handleQrResult(result)
-                              }
-                              if (error) {
-                                console.error('Erro ao ler QR Code:', error)
-                              }
-                            }}
-                            className="absolute inset-0 h-full w-full object-cover"
-                          />
-                        </div>
-                        {qrError && (
-                          <div className="text-destructive text-sm mt-2 mb-1 flex items-center gap-2 bg-destructive/10 w-full p-2 rounded-md">
-                            <AlertCircleIcon className="w-4 h-4 flex-shrink-0" />
-                            <span>{qrError}</span>
-                          </div>
-                        )}
-                        <Button
-                          className="mt-2 w-full"
-                          onClick={() => setShowQrReader(false)}
-                          type="button"
-                        >
-                          Cancelar
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Drawer QR para Mobile */}
                   <Drawer open={showQrDrawer} onOpenChange={setShowQrDrawer}>
                     <DrawerContent className="h-[85vh] rounded-t-lg">
@@ -672,30 +531,20 @@ export default function WalletTransactionForm() {
                       </DrawerHeader>
                       <div className="p-4">
                         <p className="text-sm text-muted-foreground mb-3">
-                          Aponte a câmera para um QR Code válido com{' '}
-                          {payCurrency === 'pix'
-                            ? 'uma chave PIX'
-                            : 'um endereço de wallet'}
+                          Aponte a câmera para um QR Code PIX válido
                         </p>
                         <div className="w-full aspect-square relative border-2 border-dashed border-primary/30 rounded-lg overflow-hidden mb-3">
                           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
                             <div className="w-3/4 h-3/4 border-2 border-primary rounded-lg animate-pulse opacity-60"></div>
                           </div>
                           <QrReader
+                            onResult={(result) => handleQrResult(result)}
+                            className="absolute inset-0 h-full w-full object-cover"
                             constraints={{
                               facingMode: 'environment',
                               width: { ideal: 1280 },
                               height: { ideal: 720 },
                             }}
-                            onResult={(result, error) => {
-                              if (result) {
-                                handleQrResult(result)
-                              }
-                              if (error) {
-                                console.error('Erro ao ler QR Code:', error)
-                              }
-                            }}
-                            className="absolute inset-0 h-full w-full object-cover"
                           />
                         </div>
                         {qrError && (
@@ -717,7 +566,7 @@ export default function WalletTransactionForm() {
 
                   {/* Confirmação de leitura do QR */}
                   {!showQrReader && qrSuccess && (
-                    <div className="text-primary text-sm mt-1 flex items-center gap-1 animate-in fade-in slide-in-from-bottom-1">
+                    <div className="text-primary text-sm mt-4 flex items-center gap-1 animate-in fade-in slide-in-from-bottom-1">
                       <CheckCircleIcon className="w-4 h-4" />
                       <span>QR Code lido com sucesso!</span>
                     </div>
@@ -725,39 +574,22 @@ export default function WalletTransactionForm() {
                 </FormItem>
               )}
             />
-
-            {/* Exibe detalhes do PIX quando disponíveis */}
-            {transactionType === 'pay' && payCurrency === 'pix' && pixData && (
-              <div className="mt-3 animate-in fade-in slide-in-from-bottom-1">
-                <PixDataPreview pixData={pixData} />
-              </div>
-            )}
           </div>
-        )}
-
-        {/* Alerta de erro para validação out_of_range */}
-        {form.formState.errors.amount?.message?.includes('out_of_range') && (
-          <Alert
-            variant="destructive"
-            className="animate-in fade-in slide-in-from-bottom-1"
-          >
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Valor mínimo não atingido</AlertTitle>
-            <AlertDescription>
-              {form.formState.errors.amount.message}
-            </AlertDescription>
-          </Alert>
         )}
 
         {/* Preview da transação */}
         <TransactionPreview
           isLoading={estimate.isSubmitting}
           estimate={estimate.response?.success ? estimate.response.data : null}
+          pixMode={transactionType === 'pay'}
+          pixData={
+            estimate.response?.success ? estimate.response.data?.pix : null
+          }
           onExpires={() => {
-            estimate.execute({
-              type: form.getValues('type'),
-              amount: form.getValues('amount'),
-            })
+            // estimate.execute({
+            //   type: transactionType,
+            //   amount: form.getValues('amount'),
+            // })
           }}
         />
       </main>

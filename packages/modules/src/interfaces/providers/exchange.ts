@@ -38,10 +38,27 @@ export type GetExchangeResult = {
   updatedAt: Date
 }
 
+export type GetExchangeRangesParams = {
+  from?: string
+  to?: string
+  networkFrom?: string
+  networkTo?: string
+  fixed?: boolean
+  reverse?: boolean
+}
+
+export type GetExchangeRangesResult = {
+  min: string
+  max?: string
+}
+
 export interface IExchangeProvider {
   getEstimateForExchange(
     params: EstimateExchangeParams,
   ): Promise<EstimateExchangeResult>
   createExchange(params: CreateExchangeParams): Promise<CreateExchangeResult>
   getExchange(id: string): Promise<GetExchangeResult>
+  getExchangeRanges(
+    params: GetExchangeRangesParams,
+  ): Promise<GetExchangeRangesResult>
 }

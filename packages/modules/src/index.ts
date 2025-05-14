@@ -57,5 +57,7 @@ export const modules = {
     storage: storageProvider,
     payment: paymentProvider,
     market: marketProvider,
+    exchange: exchangeProvider,
+    fiat: fiatProvider,
   },
 }

@@ -26,8 +26,6 @@ export function formatCurrency(
   }).format(value)
 }
 
-
-
 /**
  * Gera um objeto com parâmetros para estimativa de transação
  */

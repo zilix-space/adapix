@@ -4,7 +4,7 @@ import { Badge } from '@design-system/react/components/ui/badge'
 import { ArrowRightIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 
-export async function HeroSection({ quote }: { quote: number }) {
+export function HeroSection({ quote }: { quote: number }) {
   return (
     <section className="bg-primary text-primary-foreground rounded-3xl p-8 md:p-12 overflow-hidden relative">
       <div className="absolute -top-28 -right-28 w-56 h-56 bg-white/10 rounded-full blur-3xl" />

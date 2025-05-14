@@ -1,7 +1,13 @@
 'use client'
 
 import { Card, CardContent } from '@design-system/react/components/ui/card'
-import { AlertCircleIcon, CheckCircleIcon, UserIcon, MapPinIcon, KeyIcon, ReceiptIcon } from 'lucide-react'
+import {
+  CheckCircleIcon,
+  UserIcon,
+  MapPinIcon,
+  KeyIcon,
+  ReceiptIcon,
+} from 'lucide-react'
 import { type PixQRData } from '@/helpers/parse-pix-qr'
 import { cn } from '@design-system/react/helpers/cn'
 
@@ -14,7 +20,7 @@ export function PixDataPreview({ pixData, className }: PixDataPreviewProps) {
   if (!pixData) return null
 
   return (
-    <Card className={cn("border border-border", className)}>
+    <Card className={cn('border border-border', className)}>
       <CardContent className="p-4 space-y-3">
         <div className="flex items-start justify-between">
           <div className="flex flex-col">
@@ -36,7 +42,7 @@ export function PixDataPreview({ pixData, className }: PixDataPreviewProps) {
               <span className="font-semibold">
                 {new Intl.NumberFormat('pt-BR', {
                   style: 'currency',
-                  currency: 'BRL'
+                  currency: 'BRL',
                 }).format(pixData.value)}
               </span>
             </div>
@@ -48,7 +54,9 @@ export function PixDataPreview({ pixData, className }: PixDataPreviewProps) {
               <div className="flex flex-col">
                 <span className="text-sm font-medium">{pixData.name}</span>
                 {pixData.recipient && pixData.recipient !== pixData.name && (
-                  <span className="text-xs text-muted-foreground">{pixData.recipient}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {pixData.recipient}
+                  </span>
                 )}
               </div>
             </div>
@@ -59,7 +67,9 @@ export function PixDataPreview({ pixData, className }: PixDataPreviewProps) {
               <KeyIcon className="w-4 h-4 text-muted-foreground" />
               <div className="flex flex-col">
                 <span className="text-sm font-medium">Chave PIX</span>
-                <span className="text-xs text-muted-foreground break-all">{pixData.key}</span>
+                <span className="text-xs text-muted-foreground break-all">
+                  {pixData.key}
+                </span>
               </div>
             </div>
           )}
@@ -76,7 +86,9 @@ export function PixDataPreview({ pixData, className }: PixDataPreviewProps) {
               <ReceiptIcon className="w-4 h-4 text-muted-foreground mt-0.5" />
               <div className="flex flex-col">
                 <span className="text-sm font-medium">Descrição</span>
-                <span className="text-xs text-muted-foreground">{pixData.description}</span>
+                <span className="text-xs text-muted-foreground">
+                  {pixData.description}
+                </span>
               </div>
             </div>
           )}

@@ -9,11 +9,11 @@ import {
 } from './schemas'
 import { modules } from '@app/modules/src'
 import { z } from 'zod'
-import { formatCurrency } from '@/helpers/format-currency'
 import { APP_CONFIGS } from '@/boilerplate.config'
 import { renderAsync } from '@react-email/components'
 import { mapApiError, formatErrorMessage } from '@/utils/error-mappers'
 import { normalizeAmount } from '@/utils/transaction-utils'
+import { getPixKeyData } from '@/utils/pix-util'
 
 export const createTransactionAction = client.action({
   name: 'transaction.create',
@@ -26,28 +26,22 @@ export const createTransactionAction = client.action({
       throw new Error('Address is required for pay transactions')
     }
 
-    if (input.type === 'pay') {
-      input.type = 'buy'
-    }
+    // Validar limites antes de prosseguir
+    const limits = await getTransactionLimits({
+      from: input.type === 'buy' ? 'BRL' : 'ADA',
+      to: input.type === 'buy' ? 'ADA' : 'BRL',
+    })
 
-    // Verificar limites máximos definidos por variáveis de ambiente
-    const limits = {
-      buy: Number(process.env.NEXT_PUBLIC_TRANSACTION_LIMIT_BUY) || 200,
-      sell: Number(process.env.NEXT_PUBLIC_TRANSACTION_LIMIT_SELL) || 100,
-    }
-
-    if (valueNumber > limits[input.type]) {
+    if (valueNumber < limits.min) {
       throw new Error(
-        `Valor máximo para ${input.type} é de ${formatCurrency(
-          limits[input.type as 'buy' | 'sell'],
-          'BRL',
-        )}`,
+        `Amount is below minimum limit of ${limits.min} ${limits.fromCurrency} (${limits.minInFiat} ${limits.toCurrency})`,
       )
     }
 
-    const address = {
-      buy: input.address || context.user.settings.payment.wallet,
-      sell: input.address || context.user.settings.payment.wallet,
+    if (limits.max && valueNumber > limits.max) {
+      throw new Error(
+        `Amount is above maximum limit of ${limits.max} ${limits.fromCurrency} (${limits.maxInFiat} ${limits.toCurrency})`,
+      )
     }
 
     try {
@@ -55,7 +49,7 @@ export const createTransactionAction = client.action({
         await modules.usecases.transaction.createTransaction.execute({
           type: input.type,
           amount: valueNumber,
-          address: address[input.type],
+          address: input.address || context.user.settings.payment.wallet,
           userId: context.user.id,
         })
 
@@ -90,22 +84,27 @@ export const estimateTransactionAction = client.action({
 
     const valueNumber = normalizeAmount(input.amount || '0')
 
-    const limits = {
-      buy: Number(process.env.NEXT_PUBLIC_TRANSACTION_LIMIT_BUY) || 250,
-      sell: Number(process.env.NEXT_PUBLIC_TRANSACTION_LIMIT_SELL) || 250,
-    }
+    // Validar limites antes de prosseguir
+    const limits = await getTransactionLimits({
+      from: input.type === 'buy' ? 'BRL' : 'ADA',
+      to: input.type === 'buy' ? 'ADA' : 'BRL',
+    })
 
-    if (input.type === 'pay') {
-      input.type = 'buy'
-    }
-
-    if (valueNumber > limits[input.type]) {
+    if (valueNumber < limits.min) {
       return {
         success: false,
-        error: `Valor máximo para ${input.type} é de ${formatCurrency(
-          limits[input.type as 'buy' | 'sell'],
-          'BRL',
-        )}`,
+        error: `Amount is below minimum limit of ${limits.min} ${limits.fromCurrency}`,
+        errorCode: 'AMOUNT_BELOW_MIN',
+        suggestion: `Minimum amount allowed is ${limits.min} ${limits.fromCurrency} (${limits.minInFiat} ${limits.toCurrency})`,
+      }
+    }
+
+    if (limits.max && valueNumber > limits.max) {
+      return {
+        success: false,
+        error: `Amount is above maximum limit of ${limits.max} ${limits.fromCurrency}`,
+        errorCode: 'AMOUNT_ABOVE_MAX',
+        suggestion: `Maximum amount allowed is ${limits.max} ${limits.fromCurrency} (${limits.maxInFiat} ${limits.toCurrency})`,
       }
     }
 
@@ -118,7 +117,13 @@ export const estimateTransactionAction = client.action({
 
       return {
         success: true,
-        data: estimate,
+        data: {
+          ...estimate,
+          pix:
+            input.address &&
+            input.type === 'pay' &&
+            (await getPixKeyData(input.address)),
+        },
       }
     } catch (error) {
       // Usar o sistema de mapeamento para gerar erro consistente
@@ -162,5 +167,113 @@ export const listTransactionsAction = client.action({
     return modules.usecases.transaction.listTransactions.execute({
       userId: context.user.id,
     })
+  },
+})
+
+export const getTransactionLimits = client.action({
+  name: 'get.transaction.limit',
+  type: 'query',
+  schema: z.object({
+    from: z.enum(['BRL', 'ADA']),
+    to: z.enum(['BRL', 'ADA']),
+  }),
+  handler: async ({ input }) => {
+    try {
+      const adaPrice = await modules.provider.market.getQuote('cardano', 'brl')
+
+      if (input.from === 'ADA' && input.to === 'BRL') {
+        // ADA -> BRL (venda/sell ou pagamento/pay)
+        // Obter limites de ADA para USDT do SimpleSwap
+        const exchangeRanges =
+          await modules.provider.exchange.getExchangeRanges({
+            fixed: true,
+            from: 'ada',
+            to: 'usdttrc20',
+            networkFrom: 'mainnet',
+            networkTo: 'mainnet',
+          })
+
+        // Converter os valores de string para número
+        const minAda = Number(exchangeRanges.min)
+        const maxAda = exchangeRanges.max
+          ? Number(exchangeRanges.max)
+          : Infinity
+
+        // Estimar o valor em BRL para o mínimo de ADA
+        const exchangeEstimate =
+          await modules.provider.exchange.getEstimateForExchange({
+            amount: minAda,
+            from: 'ada',
+            to: 'usdttrc20',
+          })
+
+        const fiatEstimate = await modules.provider.fiat.getEstimateForExchange(
+          {
+            type: 'buy',
+            amount: exchangeEstimate.outAmount,
+          },
+        )
+
+        return {
+          min: minAda,
+          max: maxAda,
+          minInFiat: fiatEstimate.sendInFiat,
+          maxInFiat: maxAda * adaPrice,
+          fromCurrency: 'ADA',
+          toCurrency: 'BRL',
+          price: adaPrice,
+        }
+      } else if (input.from === 'BRL' && input.to === 'ADA') {
+        // BRL -> ADA (compra/buy)
+        // Obter limites de USDT para ADA do SimpleSwap
+        const exchangeRanges =
+          await modules.provider.exchange.getExchangeRanges({
+            fixed: true,
+            from: 'usdttrc20',
+            to: 'ada',
+            networkFrom: 'mainnet',
+            networkTo: 'mainnet',
+          })
+
+        // Primeiro estimar quanto USDT seria necessário para o mínimo em BRL
+        const fiatEstimate = await modules.provider.fiat.getEstimateForExchange(
+          {
+            type: 'sell',
+            amount: Number(exchangeRanges.min),
+          },
+        )
+
+        // Depois estimar quanto ADA seria obtido com esse USDT
+        const exchangeEstimate =
+          await modules.provider.exchange.getEstimateForExchange({
+            amount: fiatEstimate.sendInCrypto,
+            from: 'usdttrc20',
+            to: 'ada',
+          })
+
+        const maxAda = exchangeRanges.max
+          ? Number(exchangeRanges.max)
+          : Infinity
+
+        return {
+          min: exchangeEstimate.outAmount,
+          max: maxAda,
+          minInFiat: Number(exchangeRanges.min),
+          maxInFiat: maxAda * adaPrice,
+          fromCurrency: 'BRL',
+          toCurrency: 'ADA',
+          price: adaPrice,
+        }
+      } else {
+        throw new Error('Invalid currency pair')
+      }
+    } catch (error) {
+      const mappedError = mapApiError(error as string | Error)
+      return {
+        success: false,
+        error: formatErrorMessage(mappedError),
+        errorCode: mappedError.code,
+      }
+    }
   },
 })

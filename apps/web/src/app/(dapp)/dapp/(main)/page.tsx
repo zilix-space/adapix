@@ -29,7 +29,7 @@ export const dynamicParams = true
 export default async function Page() {
   return (
     <div className="h-full gap-y-4 grid grid-rows-[auto_1fr]">
-      <header className="bg-secondary -mx-6 -mt-6 px-6 py-6 space-y-8 border-b border-border w-screen">
+      <header className="pb-6 space-y-8 border-b border-border w-full">
         <div className="flex items-center justify-between">
           <DynamicUserNav />
           <HeaderToolbar />

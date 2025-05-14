@@ -1,6 +1,10 @@
 import { TransactionStatus } from '@app/modules/src/domain/entities/Transaction'
 import axios, { AxiosInstance } from 'axios'
-import { IExchangeProvider } from '../../interfaces/providers/exchange'
+import {
+  IExchangeProvider,
+  GetExchangeRangesParams,
+  GetExchangeRangesResult,
+} from '../../interfaces/providers/exchange'
 
 export class SimpleSwapExchangeProvider implements IExchangeProvider {
   private readonly api: AxiosInstance
@@ -120,6 +124,43 @@ export class SimpleSwapExchangeProvider implements IExchangeProvider {
       status: simpleSwapStatus[data.status],
       createdAt: new Date(data.createdAt),
       updatedAt: new Date(data.updatedAt),
+    }
+  }
+
+  async getExchangeRanges({
+    from = 'ada',
+    to = 'usdttrc20',
+    networkFrom,
+    networkTo,
+    fixed = false,
+    reverse = false,
+  }: GetExchangeRangesParams): Promise<GetExchangeRangesResult> {
+    try {
+      const response = await axios.get('https://api.changenow.io/v3/ranges', {
+        params: {
+          tickerFrom: from,
+          tickerTo: to,
+          networkFrom: networkFrom || from,
+          networkTo: networkTo || to,
+          fixed,
+          reverse,
+          'x-client-ip': process.env.CLIENT_IP,
+        },
+        headers: {
+          'api-key': process.env.SIMPLESWAP_API_KEY,
+        },
+      })
+
+      return {
+        min: response.data.result.min,
+        max: response.data.result.max,
+      }
+    } catch (error: any) {
+      console.error(
+        'Error fetching exchange ranges:',
+        error.response?.data || error.message,
+      )
+      throw new Error('Error fetching exchange ranges')
     }
   }
 }

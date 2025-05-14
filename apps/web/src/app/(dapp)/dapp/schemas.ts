@@ -8,6 +8,6 @@ export const createTransactionActionSchema = z.object({
 
 export const estimateTransactionActionSchema = z.object({
   type: z.enum(['sell', 'buy', 'pay']),
-  currency: z.enum(['BRL', 'ADA']).optional(),
   amount: z.string(),
+  address: z.string().optional(),
 })

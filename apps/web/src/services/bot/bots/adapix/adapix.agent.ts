@@ -673,6 +673,7 @@ export const bot = Bot.create({
                     type: 'shelley',
                     script: false,
                   }
+
                   let transactionsData: any[] = []
                   let walletInfoError: string | null = null
                   let txHistoryError: string | null = null
