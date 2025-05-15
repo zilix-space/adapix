@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   UserPlusIcon,
@@ -6,9 +6,9 @@ import {
   WalletIcon,
   KeyIcon,
   CurrencyIcon,
-} from 'lucide-react'
-import { motion } from 'framer-motion'
-import { AnimatedSection } from './animated-section'
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { AnimatedSection } from "./animated-section";
 
 export function HowToWorksSection() {
   return (
@@ -38,7 +38,7 @@ export function HowToWorksSection() {
             <div className="md:pt-0 w-full">
               <div className="p-0 md:p-0 transition-all duration-300">
                 <div className="flex items-center mb-2">
-                  <UserPlusIcon className="text-primary w-5 h-5 mr-3" />
+                  <UserPlusIcon className="text-primary w-5 h-5 mx-1.5" />
                   <h3 className="text-base font-medium">Crie sua conta</h3>
                 </div>
                 <p className="text-muted-foreground leading-relaxed pl-8 text-sm">
@@ -63,7 +63,7 @@ export function HowToWorksSection() {
             <div className="md:pt-0 w-full">
               <div className="p-0 md:p-0 transition-all duration-300">
                 <div className="flex items-center mb-2">
-                  <CheckCircleIcon className="text-primary w-5 h-5 mr-3" />
+                  <CheckCircleIcon className="text-primary w-5 h-5 mx-1.5" />
                   <h3 className="text-base font-medium">Valide sua conta</h3>
                 </div>
                 <p className="text-muted-foreground leading-relaxed pl-8 text-sm">
@@ -88,7 +88,7 @@ export function HowToWorksSection() {
             <div className="md:pt-0 w-full">
               <div className="p-0 md:p-0 transition-all duration-300">
                 <div className="flex items-center mb-2">
-                  <WalletIcon className="text-primary w-5 h-5 mr-3" />
+                  <WalletIcon className="text-primary w-5 h-5 mx-1.5" />
                   <h3 className="text-base font-medium">
                     Conecte sua wallet Cardano
                   </h3>
@@ -115,7 +115,7 @@ export function HowToWorksSection() {
             <div className="md:pt-0 w-full">
               <div className="p-0 md:p-0 transition-all duration-300">
                 <div className="flex items-center mb-2">
-                  <KeyIcon className="text-primary w-5 h-5 mr-3" />
+                  <KeyIcon className="text-primary w-5 h-5 mx-1.5" />
                   <h3 className="text-base font-medium">
                     Cadastre sua chave PIX
                   </h3>
@@ -142,7 +142,7 @@ export function HowToWorksSection() {
             <div className="md:pt-0 w-full">
               <div className="p-0 md:p-0 transition-all duration-300">
                 <div className="flex items-center mb-2">
-                  <CurrencyIcon className="text-primary w-5 h-5 mr-3" />
+                  <CurrencyIcon className="text-primary w-5 h-5 mx-1.5" />
                   <h3 className="text-base font-medium">
                     Compre e venda Cardano
                   </h3>
@@ -157,5 +157,5 @@ export function HowToWorksSection() {
         </main>
       </section>
     </AnimatedSection>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { Badge } from '@design-system/react/components/ui/badge'
-import { ArrowRightIcon } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { Badge } from "@design-system/react/components/ui/badge";
+import { ArrowRightIcon } from "lucide-react";
+import { motion } from "framer-motion";
 
 export function HeroSection({ quote }: { quote: number }) {
   return (
@@ -31,20 +31,20 @@ export function HeroSection({ quote }: { quote: number }) {
         </motion.p>
 
         <motion.div
-          className="flex mt-6 space-x-3"
+          className="flex flex-col md:flex-row mt-6 space-y-3 md:space-y-0 md:space-x-3"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <motion.button
-            className="bg-white text-primary px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white/90 transition-colors"
+            className="bg-white text-left text-primary px-5 py-2.5 rounded-full text-sm font-medium hover:bg-white/90 transition-colors"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
             Começar agora
           </motion.button>
           <motion.button
-            className="text-white border border-white/20 px-5 py-2.5 rounded-full text-sm font-medium flex items-center group hover:bg-white/10 transition-colors"
+            className="text-white border justify-between border-white/20 px-5 py-2.5 rounded-full text-sm font-medium flex items-center group hover:bg-white/10 transition-colors"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
           >
@@ -63,10 +63,10 @@ export function HeroSection({ quote }: { quote: number }) {
             Cotação da ADA (Cardano) hoje:
           </small>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 w-full md:w-fit">
             <Badge
               variant="outline"
-              className="h-10 px-4 pl-3 bg-background/10 backdrop-blur-sm border-white/10 text-white shadow-sm"
+              className="h-10 px-4 pl-3 bg-background/10 w-full md:w-fit backdrop-blur-sm border-white/10 text-white shadow-sm"
             >
               <span className="h-6 w-6 flex items-center justify-center rounded-full bg-white/10 mr-3 font-medium">
                 ₳
@@ -75,12 +75,9 @@ export function HeroSection({ quote }: { quote: number }) {
                 1 ADA = <span className="text-white">R${quote}</span>
               </span>
             </Badge>
-            <span className="text-primary-foreground/60 text-xs">
-              Atualizado agora
-            </span>
           </div>
         </motion.div>
       </div>
     </section>
-  )
+  );
 }
