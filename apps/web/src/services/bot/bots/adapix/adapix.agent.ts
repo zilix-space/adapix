@@ -279,8 +279,8 @@ export const bot = Bot.create({
           where: {
             userId: user.id,
             createdAt: {
-              // last 24 hours
-              gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+              // last 1 hour
+              gte: new Date(Date.now() - 60 * 60 * 1000),
             },
           },
           orderBy: {
